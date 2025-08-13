@@ -40,15 +40,7 @@
             openssl 
           ]; 
  
-          # Explicitly set OPENSSL_DIR for openssl-sys 
-          OPENSSL_DIR = pkgs.openssl.dev; 
- 
-          # Explicitly link OpenSSL libraries 
-          rustcBuildFlags = [ 
-            "-L${pkgs.openssl}/lib" # Changed from pkgs.openssl.lib 
-            "-lssl" 
-            "-lcrypto" 
-          ]; 
+          # Removed OPENSSL_DIR and rustcBuildFlags 
  
           # Install the binary 
           installPhase = '' 
