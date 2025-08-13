@@ -45,7 +45,7 @@
  
           # Explicitly link OpenSSL libraries 
           rustcBuildFlags = [ 
-            "-L${pkgs.openssl.lib}/lib" 
+            "-L${pkgs.openssl}/lib" # Changed from pkgs.openssl.lib 
             "-lssl" 
             "-lcrypto" 
           ]; 
