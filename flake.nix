@@ -12,7 +12,7 @@
     flake-utils.lib.eachDefaultSystem (system: 
       let 
         pkgs = nixpkgs.legacyPackages.${system}; 
-        craneLib = crane.lib; # Get crane library directly 
+        craneLib = crane.lib.${system}; # Get crane library for the system 
       in 
       { 
         devShells.default = pkgs.mkShell { 
@@ -37,11 +37,12 @@
           # crane handles release builds automatically 
           # cargoBuildFlags = [ ]; 
  
-          # crane handles build inputs more automatically, but we can still specify them if needed 
-          # buildInputs = with pkgs; [ 
-          #   pkg-config 
-          #   openssl 
-          # ]; 
+          # Build inputs for openssl-sys and pkg-config 
+          buildInputs = with pkgs; [ 
+            pkg-config 
+            openssl 
+            pkgs.lib.getLib pkgs.openssl # Explicitly get the library 
+          ]; 
  
           # Remove explicit OpenSSL environment variables 
           # PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig"; 
