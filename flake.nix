@@ -4,8 +4,8 @@
   inputs = { 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; 
     flake-utils.url = "github:numtide/flake-utils"; 
-    crane.url = "github:ipetkov/crane"; # Add crane input 
-    crane.inputs.nixpkgs.follows = "nixpkgs"; # Ensure crane uses the same nixpkgs 
+    crane.url = "github:ipetkov/crane"; 
+    crane.inputs.nixpkgs.follows = "nixpkgs"; 
  
     rust-overlay = { 
       url = "github:oxalica/rust-overlay"; 
@@ -13,7 +13,7 @@
     }; 
   }; 
  
-  outputs = { self, nixpkgs, flake-utils, crane, rust-overlay }: # Add rust-overlay to outputs 
+  outputs = { self, nixpkgs, flake-utils, crane, rust-overlay }: 
     flake-utils.lib.eachDefaultSystem (system: 
       let 
         pkgs = import nixpkgs { 
@@ -24,43 +24,41 @@
  
         craneLib = (crane.mkLib pkgs).overrideToolchain (p: p.rust-bin.stable.latest.default); 
         src = craneLib.cleanCargoSource ./.; 
+ 
+        crateExpression = { openssl, pkg-config, stdenv }: 
+          craneLib.buildPackage { 
+            pname = "garnix-fetcher"; 
+            version = "0.1.0"; 
+            inherit src; 
+ 
+            cargoLock = ./Cargo.lock; 
+            doCheck = false; 
+ 
+            nativeBuildInputs = [ 
+              pkg-config 
+            ]; 
+ 
+            buildInputs = [ 
+              openssl 
+            ]; 
+ 
+            installPhase = '' 
+              mkdir -p $out/bin 
+              cp target/release/garnix-fetcher $out/bin/ 
+            ''; 
+          }; 
+ 
       in 
       { 
         devShells.default = pkgs.mkShell { 
           packages = with pkgs; [ 
             rustc 
             cargo 
-            pkg-config 
-            openssl 
-            gcc # Add gcc 
+            gcc 
           ]; 
         }; 
  
-        packages.default = craneLib.buildPackage { # Use craneLib.buildPackage 
-          pname = "garnix-fetcher"; 
-          version = "0.1.0"; 
-          inherit src; # Use cleaned source 
- 
-          cargoLock = ./Cargo.lock; # Path to Cargo.lock 
- 
-          doCheck = false; # Disable tests during build 
- 
-          # Explicitly add openssl to buildInputs 
-          buildInputs = with pkgs; [ 
-            openssl 
-          ]; 
- 
-          # Explicitly set environment variables for openssl-sys 
-          PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig"; 
-          OPENSSL_DIR = pkgs.openssl; # Point to the main openssl package 
-          OPENSSL_LIB_DIR = "${pkgs.openssl}/lib"; # Point to the lib directory of the main openssl package 
- 
-          # Install the binary 
-          installPhase = '' 
-            mkdir -p $out/bin 
-            cp target/release/garnix-fetcher $out/bin/ 
-          ''; 
-        }; 
+        packages.default = pkgs.callPackage crateExpression { }; 
       } 
     ); 
 }
