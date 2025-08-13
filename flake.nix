@@ -32,7 +32,8 @@
           }; 
  
           # Build in release mode 
-          cargoBuildFlags = [ "--release" ]; 
+          # Removed --release from cargoBuildFlags 
+          cargoBuildFlags = [ ]; 
  
           # Install the binary 
           installPhase = '' 
