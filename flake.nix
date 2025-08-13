@@ -18,6 +18,7 @@
             cargo 
             pkg-config 
             openssl 
+            gcc # Add gcc 
           ]; 
         }; 
  
