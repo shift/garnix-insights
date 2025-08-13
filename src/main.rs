@@ -109,7 +109,7 @@ async fn get_garnix_data(jwt_token: &str, commit_id: &str) -> Result<GarnixRespo
 }
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> Result<(), Box<dyn std::error.Error>> {
     let args: Vec<String> = env::args().collect();
 
     // Check if running as server
@@ -220,7 +220,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                         .header("sec-fetch-site", "same-origin")
                         .header("referer", format!("https://garnix.io/build/{}", build.id))
                         .header("user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36")
-                        .header("cookie", cookie.clone()) // Use cloned cookie
+                        .header("cookie", format!("__stripe_mid=119e351f-f0e8-4943-abae-6e207d8b6aac548adf; JWT-Cookie={}; NO-XSRF-TOKEN=", jwt_token)) // Use jwt_token directly
                         .send()
                         .await?;
 
