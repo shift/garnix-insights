@@ -34,6 +34,12 @@
           # Build in release mode 
           cargoBuildFlags = [ ]; 
  
+          # Build inputs for openssl-sys and pkg-config 
+          buildInputs = with pkgs; [ 
+            pkg-config 
+            openssl 
+          ]; 
+ 
           # Install the binary 
           installPhase = '' 
             mkdir -p $out/bin 
