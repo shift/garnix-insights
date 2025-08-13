@@ -81,10 +81,9 @@ async fn build_status_handler(req: web::Json<BuildStatusRequest>) -> impl Respon
     }
 }
 
-// New function to fetch and parse Garnix data (moved from main)
+// Function to fetch and parse Garnix data
 async fn get_garnix_data(jwt_token: &str, commit_id: &str) -> Result<GarnixResponse, Box<dyn std::error::Error>> {
-    let client = reqwest::Client::new();
-
+    let client = reqwest::Client::new(); // Create client inside function
     let url = format!("https://garnix.io/api/commits/{}", commit_id);
     let cookie = format!("__stripe_mid=119e351f-f0e8-4943-abae-6e207d8b6aac548adf; JWT-Cookie={}; NO-XSRF-TOKEN=", jwt_token);
 
@@ -139,8 +138,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         while i < args.len() {
             if args[i] == "--json-output" {
                 json_output = true;
-            } else {
-                package_names.push(args[i].clone());
             }
             i += 1;
         }
@@ -211,7 +208,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                     }
                     // Fetch and display logs
                     let log_url = format!("https://garnix.io/api/build/{}/logs", build.id);
-                    let log_response = client.get(&log_url)
+                    let log_response = reqwest::Client::new().get(&log_url)
                         .header("accept", "*/*")
                         .header("accept-language", "en-GB,en-US;q=0.9,en;q=0.8,de;q=0.7")
                         .header("priority", "u=1, i")
