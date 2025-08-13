@@ -118,12 +118,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> { // main is now synchronous
             HttpServer::new(|| {
                 App::new().service(build_status_handler)
             })
-            .bind(("127.0.0.1", 8080))?.run().await?;
-            Ok(()) // Explicitly return Ok(())
-        })
+            .bind(("127.0.0.1", 8080))?.run().await
+        }) // Removed ? here
     } else {
         // Run as CLI tool
-        tokio::runtime::Runtime::new().unwrap().block_on(async -> Result<(), Box<dyn std::error::Error>> { // Explicitly return Result
+        tokio::runtime::Runtime::new().unwrap().block_on(async {
             if args.len() < 3 { // Expect program name, JWT, and Commit ID
                 eprintln!("Usage: {} <JWT_TOKEN> <COMMIT_ID> [--json-output] [PACKAGE_NAME...]", args[0]);
                 std::process::exit(1);
@@ -221,7 +220,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> { // main is now synchronous
                             .header("sec-fetch-site", "same-origin")
                             .header("referer", format!("https://garnix.io/build/{}", build.id))
                             .header("user-agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36")
-                            .header("cookie", format!("__stripe_mid=119e351f-f0e8-4943-abae-6e207d8b6aac548adf; JWT-Cookie={}; NO-XSRF-TOKEN=", jwt_token)) // Use jwt_token directly
+                            .header("cookie", format!("__stripe_mid=119e3511f-f0e8-4943-abae-6e207d8b6aac548adf; JWT-Cookie={}; NO-XSRF-TOKEN=", jwt_token)) // Use jwt_token directly
                             .send()
                             .await?;
 
