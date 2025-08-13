@@ -48,6 +48,7 @@
             ''; 
           }; 
  
+        garnixFetcher = pkgs.callPackage crateExpression { }; # The main executable 
       in 
       { 
         devShells.default = pkgs.mkShell { 
@@ -58,7 +59,18 @@
           ]; 
         }; 
  
-        packages.default = pkgs.callPackage crateExpression { }; 
+        packages.default = garnixFetcher; # The CLI executable 
+ 
+        apps.default = flake-utils.lib.mkApp { 
+          drv = garnixFetcher; # Default app is the CLI 
+        }; 
+ 
+        apps.server = flake-utils.lib.mkApp { 
+          drv = pkgs.writeScriptBin "garnix-api-server" '' 
+            #!${pkgs.bash}/bin/bash 
+            exec ${garnixFetcher}/bin/garnix-fetcher --server "$@" 
+          ''; 
+        }; 
       } 
     ); 
 }
