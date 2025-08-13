@@ -36,7 +36,7 @@
           ]; 
         }; 
  
-        packages.default = craneLib.buildRustPackage { 
+        packages.default = craneLib.buildPackage { # Use craneLib.buildPackage 
           pname = "garnix-fetcher"; 
           version = "0.1.0"; 
           inherit src; # Use cleaned source 
