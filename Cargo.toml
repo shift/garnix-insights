@@ -2,6 +2,7 @@
 name = "garnix-fetcher"
 version = "0.1.0"
 edition = "2024"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 reqwest = { version = "0.12", features = ["json"] }
