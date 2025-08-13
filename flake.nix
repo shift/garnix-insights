@@ -41,9 +41,7 @@
           version = "0.1.0"; 
           inherit src; # Use cleaned source 
  
-          cargoLock = { 
-            lockFile = ./Cargo.lock; # Path to Cargo.lock 
-          }; 
+          cargoLock = ./Cargo.lock; # Path to Cargo.lock 
  
           doCheck = false; # Disable tests during build 
  
