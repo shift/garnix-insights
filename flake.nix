@@ -45,6 +45,16 @@
  
           doCheck = false; # Disable tests during build 
  
+          # Explicitly add openssl to buildInputs 
+          buildInputs = with pkgs; [ 
+            openssl 
+          ]; 
+ 
+          # Explicitly set environment variables for openssl-sys 
+          PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig"; 
+          OPENSSL_DIR = pkgs.openssl; # Point to the main openssl package 
+          OPENSSL_LIB_DIR = "${pkgs.openssl}/lib"; # Point to the lib directory of the main openssl package 
+ 
           # Install the binary 
           installPhase = '' 
             mkdir -p $out/bin 
