@@ -118,14 +118,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> { // main is now synchronous
             HttpServer::new(|| {
                 App::new().service(build_status_handler)
             })
-            .bind(("127.0.0.1", 8080))?
-            .run()
-            .await?;
+            .bind(("127.0.0.1", 8080))?.run().await?;
             Ok(()) // Explicitly return Ok(())
         })
     } else {
         // Run as CLI tool
-        tokio::runtime::Runtime::new().unwrap().block_on(async {
+        tokio::runtime::Runtime::new().unwrap().block_on(async -> Result<(), Box<dyn std::error::Error>> { // Explicitly return Result
             if args.len() < 3 { // Expect program name, JWT, and Commit ID
                 eprintln!("Usage: {} <JWT_TOKEN> <COMMIT_ID> [--json-output] [PACKAGE_NAME...]", args[0]);
                 std::process::exit(1);
