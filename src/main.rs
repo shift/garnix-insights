@@ -121,7 +121,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> { // main is now synchronous
             .bind(("127.0.0.1", 8080))?
             .run()
             .await?;
-            Ok(())
+            Ok(()) // Explicitly return Ok(())
         })
     } else {
         // Run as CLI tool
