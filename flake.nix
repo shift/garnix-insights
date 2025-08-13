@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; 
     flake-utils.url = "github:numtide/flake-utils"; 
     crane.url = "github:ipetkov/crane"; # Add crane input 
-    crane.inputs.nixpkgs.follows = "nixpkgs"; # Ensure crane uses the same nixpkgs 
+    # Removed crane.inputs.nixpkgs.follows = "nixpkgs"; 
   }; 
  
   outputs = { self, nixpkgs, flake-utils, crane }: # Add crane to outputs 
