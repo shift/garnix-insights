@@ -40,6 +40,9 @@
             openssl 
           ]; 
  
+          # Explicitly set OPENSSL_DIR for openssl-sys 
+          OPENSSL_DIR = pkgs.openssl.dev; 
+ 
           # Install the binary 
           installPhase = '' 
             mkdir -p $out/bin 
