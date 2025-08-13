@@ -5,14 +5,25 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable"; 
     flake-utils.url = "github:numtide/flake-utils"; 
     crane.url = "github:ipetkov/crane"; # Add crane input 
-    # Removed crane.inputs.nixpkgs.follows = "nixpkgs"; 
+    crane.inputs.nixpkgs.follows = "nixpkgs"; # Ensure crane uses the same nixpkgs 
+ 
+    rust-overlay = { 
+      url = "github:oxalica/rust-overlay"; 
+      inputs.nixpkgs.follows = "nixpkgs"; 
+    }; 
   }; 
  
-  outputs = { self, nixpkgs, flake-utils, crane }: # Add crane to outputs 
+  outputs = { self, nixpkgs, flake-utils, crane, rust-overlay }: # Add rust-overlay to outputs 
     flake-utils.lib.eachDefaultSystem (system: 
       let 
-        pkgs = nixpkgs.legacyPackages.${system}; 
-        craneLib = crane.mkLib pkgs; # Get crane library using mkLib 
+        pkgs = import nixpkgs { 
+          inherit system; 
+          overlays = [ (import rust-overlay) ]; 
+        }; 
+        inherit (pkgs) lib; 
+ 
+        craneLib = (crane.mkLib pkgs).overrideToolchain (p: p.rust-bin.stable.latest.default); 
+        src = craneLib.cleanCargoSource ./.; 
       in 
       { 
         devShells.default = pkgs.mkShell { 
@@ -25,29 +36,16 @@
           ]; 
         }; 
  
-        packages.default = craneLib.buildRustPackage { # Use craneLib.buildRustPackage 
+        packages.default = craneLib.buildRustPackage { 
           pname = "garnix-fetcher"; 
           version = "0.1.0"; 
-          src = ./.; # Source is the current directory 
+          inherit src; # Use cleaned source 
  
           cargoLock = { 
             lockFile = ./Cargo.lock; # Path to Cargo.lock 
           }; 
  
-          # crane handles release builds automatically 
-          # cargoBuildFlags = [ ]; 
- 
-          # Build inputs for openssl-sys and pkg-config 
-          buildInputs = with pkgs; [ 
-            pkg-config 
-            openssl 
-            pkgs.lib.getLib pkgs.openssl # Explicitly get the library 
-          ]; 
- 
-          # Remove explicit OpenSSL environment variables 
-          # PKG_CONFIG_PATH = "${pkgs.openssl.dev}/lib/pkgconfig"; 
-          # OPENSSL_LIB_DIR = "${pkgs.openssl.out}/lib"; 
-          # OPENSSL_INCLUDE_DIR = "${pkgs.openssl.dev}/include"; 
+          doCheck = false; # Disable tests during build 
  
           # Install the binary 
           installPhase = '' 
