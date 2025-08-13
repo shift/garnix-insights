@@ -32,7 +32,6 @@
           }; 
  
           # Build in release mode 
-          # Removed --release from cargoBuildFlags 
           cargoBuildFlags = [ ]; 
  
           # Install the binary 
