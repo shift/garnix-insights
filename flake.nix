@@ -162,9 +162,10 @@
             git-filter-repo  # For rewriting git history
             python3  # Required by git-filter-repo
             gh  # GitHub CLI for releases 
+          ];
 
           shellHook = ''
-            echo "🚀 Garnix Insights Development Environment"
+            echo "Garnix Insights Development Environment"
             echo "Available commands:"
             echo "  cargo build         - Build the project"
             echo "  cargo test          - Run tests" 
