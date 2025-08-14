@@ -122,7 +122,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> { // main is now synchronous
         })
     } else {
         // Run as CLI tool
-        return tokio::runtime::Runtime::new().unwrap().block_on(async -> Result<(), Box<dyn std::error.Error>> { // Explicitly define return type
+        return tokio::runtime::Runtime::new().unwrap().block_on(async -> Result<(), Box<dyn std::error::Error>> { // Explicitly define return type
             if args.len() < 3 { // Expect program name, JWT, and Commit ID
                 eprintln!("Usage: {} <JWT_TOKEN> <COMMIT_ID> [--json-output] [PACKAGE_NAME...]", args[0]);
                 std::process::exit(1);
