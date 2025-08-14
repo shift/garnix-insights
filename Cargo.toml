@@ -1,6 +1,6 @@
 [package]
 name = "garnix-insights"
-version = "0.1.5"
+version = "0.1.0"
 edition = "2021"
 license = "AGPL-3.0"
 description = "CI/CD insights for Garnix.io - CLI tool, HTTP server, and MCP server for build analysis"
