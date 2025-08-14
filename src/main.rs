@@ -118,8 +118,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> { // main is now synchronous
             HttpServer::new(|| {
                 App::new().service(build_status_handler)
             })
-            .bind(("127.0.0.1", 8080))?.run().await
-        }) // Removed ? here
+            .bind(("127.0.0.1", 8080))?.run().await?;
+            Ok(()) // Explicitly return Ok(())
+        })
     } else {
         // Run as CLI tool
         tokio::runtime::Runtime::new().unwrap().block_on(async {
