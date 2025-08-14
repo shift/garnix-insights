@@ -1,15 +1,15 @@
 # Garnix Insights
 
-A professional multi-mode Rust application for comprehensive CI/CD insights from Garnix.io. Available as a CLI tool, HTTP server, and MCP (Model Context Protocol) server for AI assistant integration.
+A multi-mode Rust application for CI/CD insights from Garnix.io. Available as a CLI tool, HTTP server, and MCP (Model Context Protocol) server for AI assistant integration.
 
 ## Features
 
 - **Multiple Operating Modes**: CLI, HTTP server, and MCP server
-- **Comprehensive Build Analysis**: Real-time status, detailed logs, and failure analysis
-- **Professional Output Formats**: Human-readable, JSON, and plain text
+- **Build Analysis**: Real-time status, detailed logs, and failure analysis
+- **Output Formats**: Human-readable, JSON, and plain text
 - **AI Assistant Integration**: Full MCP support for GitHub Copilot, Claude, and other AI tools
-- **Robust Error Handling**: Graceful handling of API failures and network issues
-- **Security Focused**: AGPL-3.0 licensed with comprehensive dependency auditing
+- **Error Handling**: Graceful handling of API failures and network issues
+- **Security Focused**: AGPL-3.0 licensed with dependency auditing
 
 ## Installation
 
