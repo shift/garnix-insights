@@ -12,6 +12,15 @@
       inputs.nixpkgs.follows = "nixpkgs"; 
     }; 
   }; 
+
+  nixConfig = {
+    extra-substituters = [
+      "https://cache.garnix.io"
+    ];
+    extra-trusted-public-keys = [
+      "cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+    ];
+  }; 
  
   outputs = { self, nixpkgs, flake-utils, crane, rust-overlay }: 
     flake-utils.lib.eachDefaultSystem (system: 

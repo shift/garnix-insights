@@ -1,0 +1,11 @@
+builds:
+  include:
+    - "*.x86_64-linux.*"
+    - "*.aarch64-linux.*" 
+    - "*.x86_64-darwin.*"
+    - "*.aarch64-darwin.*"
+  exclude: []
+
+cache:
+  push: true
+  pull: true
