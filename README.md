@@ -1,140 +1,167 @@
-# Garnix Fetcher
+# Garnix Insights
 
-A multi-mode Rust application to fetch and parse build status information from the Garnix.io API. Available as a CLI tool, HTTP server, or MCP (Model Context Protocol) server.
+A professional multi-mode Rust application for comprehensive CI/CD insights from Garnix.io. Available as a CLI tool, HTTP server, and MCP (Model Context Protocol) server for AI assistant integration.
 
 ## Features
 
 - **Multiple Operating Modes**: CLI, HTTP server, and MCP server
-- Retrieve a summary of a commit's builds from Garnix.io
-- Display a detailed table of all packages with their pass/fail status (using emojis)
-- Fetch and display logs for failed builds
-- JSON output support for programmatic usage
-- MCP integration for AI assistants
+- **Comprehensive Build Analysis**: Real-time status, detailed logs, and failure analysis
+- **Professional Output Formats**: Human-readable, JSON, and plain text
+- **AI Assistant Integration**: Full MCP support for GitHub Copilot, Claude, and other AI tools
+- **Robust Error Handling**: Graceful handling of API failures and network issues
+- **Security Focused**: AGPL-3.0 licensed with comprehensive dependency auditing
 
 ## Installation
 
-This project is built using Nix flakes, ensuring a reproducible development environment.
+### From Cargo (Recommended)
 
-1.  **Clone the repository:**
+```bash
+cargo install garnix-insights
+```
 
-    ```bash
-    git clone https://github.com/your-username/garnix-fetcher.git
-    cd garnix-fetcher
-    ```
+### From Nix Flake
 
-2.  **Build the application using Nix:**
+```bash
+# Install to profile
+nix profile install github:shift/garnix-insights
 
-    ```bash
-    nix build .#default
-    ```
+# Or run directly
+nix run github:shift/garnix-insights -- --help
+```
 
-    This will build the `garnix-fetcher` executable and place it in `result/bin/garnix-fetcher`.
+### From Source
+
+```bash
+git clone https://github.com/shift/garnix-insights.git
+cd garnix-insights
+nix build
+./result/bin/garnix-insights --help
+```
 
 ## Usage
 
 ### CLI Mode
 
-The default mode for direct command-line usage:
+Set your JWT token as an environment variable:
 
 ```bash
-./result/bin/garnix-fetcher <JWT_TOKEN> <COMMIT_ID> [--json-output]
+export GARNIX_JWT_TOKEN="your_jwt_token_here"
 ```
 
-**Example:**
+Check build status for a commit:
 
 ```bash
-./result/bin/garnix-fetcher "your_jwt_token_here" "3402d0072ce57370ed58ce28fe879c32a3501392"
+garnix-insights fetch --commit-id 3402d0072ce57370ed58ce28fe879c32a3501392
 ```
 
-**With JSON output:**
+Get detailed build logs:
 
 ```bash
-./result/bin/garnix-fetcher "your_jwt_token_here" "3402d0072ce57370ed58ce28fe879c32a3501392" --json-output
+garnix-insights logs --commit-id 3402d0072ce57370ed58ce28fe879c32a3501392
+```
+
+**Output Formats:**
+
+```bash
+garnix-insights fetch --commit-id <COMMIT> --format json    # JSON output
+garnix-insights fetch --commit-id <COMMIT> --format human   # Human-readable (default)
+garnix-insights fetch --commit-id <COMMIT> --format plain   # Plain text
 ```
 
 ### HTTP Server Mode
 
-Run as an HTTP server on port 8080:
-
 ```bash
-./result/bin/garnix-fetcher --server
+export GARNIX_JWT_TOKEN="your_jwt_token_here"
+garnix-insights server
 ```
 
-The server provides an endpoint at `http://127.0.0.1:8080/build-status/{commit_id}` that requires the JWT token to be set via the `JWT_TOKEN` environment variable.
+Access the API at `http://127.0.0.1:8080/build-status/{commit_id}`
 
 ### MCP Server Mode
 
-Run as a Model Context Protocol server for AI assistants:
+For AI assistant integration:
 
 ```bash
-./result/bin/garnix-fetcher --mcp
+export GARNIX_JWT_TOKEN="your_jwt_token_here"
+garnix-insights mcp
 ```
 
-The MCP server provides a `garnix_build_status` tool that can be used by AI assistants to fetch Garnix build information. The tool accepts:
-- `jwt`: JWT token for Garnix.io authentication
-- `commit_id`: Git commit ID to fetch build status for
+## AI Assistant Integration
 
-## MCP Integration
+### GitHub Copilot
 
-### Configure with Claude Desktop
+Add this to your `.github/copilot-instructions.md`:
 
-Add to your Claude Desktop configuration file:
+```markdown
+## Garnix CI/CD Integration
+- Use `garnix-insights fetch --commit-id <SHA>` to check build status
+- Use `garnix-insights logs --commit-id <SHA>` for failure analysis  
+- Always check builds before suggesting deployments
+- Parse JSON output for programmatic analysis
+```
+
+### Claude Desktop
+
+Add to your configuration file:
 
 ```json
 {
   "mcpServers": {
-    "garnix-fetcher": {
-      "command": "/path/to/garnix-fetcher/result/bin/garnix-fetcher",
-      "args": ["--mcp"]
-    },
-    "nixos-packages": {
-      "command": "npx",
-      "args": ["-y", "@anysphere/mcp-server-nixos@latest"]
+    "garnix-insights": {
+      "command": "garnix-insights",
+      "args": ["mcp"],
+      "env": {
+        "GARNIX_JWT_TOKEN": "your-token-here"
+      }
     }
   }
 }
 ```
 
-### NixOS MCP Server
-
-For comprehensive NixOS package management and search capabilities, also consider adding the NixOS MCP server from https://mcp-nixos.io/. This provides tools for:
-- Searching NixOS packages
-- Getting package information
-- Finding configuration options
-- Package version management
-
-Install via npm:
-```bash
-npx @anysphere/mcp-server-nixos@latest
-```
+For comprehensive setup instructions, see [MCP-CONFIGURATION.md](MCP-CONFIGURATION.md).
 
 ## Development
 
-Enter the development environment:
+### Prerequisites
+
+- Nix with flakes enabled
+- Rust toolchain (via Nix shell)
+
+### Getting Started
 
 ```bash
+# Clone the repository
+git clone https://github.com/shift/garnix-insights.git
+cd garnix-insights
+
+# Enter development environment
 nix develop
-```
 
-Build for development:
-
-```bash
-cargo build
-```
-
-Run tests:
-
-```bash
+# Run tests
 cargo test
+
+# Build for development  
+cargo build
+
+# Run comprehensive CI checks
+nix flake check
 ```
 
-## Licensing
+### Publishing
 
-This project is dual-licensed under the MIT License and the Apache License 2.0.
+See [PUBLISHING.md](PUBLISHING.md) for detailed instructions on publishing to crates.io.
 
-- See [LICENSE-MIT](LICENSE-MIT) for details on the MIT License.
-- See [LICENSE-APACHE](LICENSE-APACHE) for details on the Apache License 2.0.
+## License
 
-## Contributing
+This project is licensed under **AGPL-3.0** with commercial approval requirements.
 
-Contributions are welcome! Please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute to this project. (Note: This file is not yet created, but will be added soon.)
+- **Open Source Use**: Free for open source projects under AGPL-3.0 terms
+- **Commercial Use**: Requires separate commercial license approval
+- See [LICENSE-AGPL-3.0.md](LICENSE-AGPL-3.0.md) for full license terms
+- See [LICENSE-ANALYSIS.md](LICENSE-ANALYSIS.md) for dependency analysis
+
+## Support
+
+- **Issues**: https://github.com/shift/garnix-insights/issues
+- **Documentation**: Complete guides in [AI-INSTRUCTIONS.md](AI-INSTRUCTIONS.md) and [MCP-CONFIGURATION.md](MCP-CONFIGURATION.md)
+- **Contributing**: Follow standard Rust/Nix contribution practices

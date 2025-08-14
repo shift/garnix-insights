@@ -1,0 +1,82 @@
+# cargo-deny configuration for license and security compliance
+# See https://embarkstudios.github.io/cargo-deny/
+
+[licenses]
+# List of explicitly allowed licenses
+# SPDX identifiers: https://spdx.org/licenses/
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause", 
+    "ISC",
+    "Unicode-3.0",
+    "Unlicense",
+    "0BSD",
+    "MPL-2.0",
+    "Zlib",
+    "LGPL-2.1+",  # Only when used with MIT/Apache dual licensing
+]
+
+# Licenses we explicitly deny
+deny = [
+    "GPL-2.0",      # Incompatible with AGPL-3.0
+    "GPL-3.0",      # Use AGPL-3.0 instead
+    "AGPL-1.0",     # Outdated
+    "AGPL-2.0",     # Outdated  
+]
+
+# Confidence threshold for detecting license
+confidence-threshold = 0.8
+
+# Allow 1 or more duplicate licenses
+exceptions = [
+    # Multi-licensed crates where we accept any compatible option
+    { allow = ["Apache-2.0", "MIT"], name = "ring" },
+    { allow = ["Apache-2.0", "MIT", "LGPL-2.1+"], name = "r-efi" },
+]
+
+[bans]
+# Warn about multiple versions of the same crate
+multiple-versions = "warn"
+
+# Crates we never want to use
+deny = [
+    # Security-problematic crates
+    { name = "openssl", version = "*", reason = "Use rustls instead for better security" },
+]
+
+# Skip certain crates from duplication analysis
+skip = [
+    # Different major versions are acceptable
+    { name = "windows-sys" },
+    { name = "windows-targets" },
+]
+
+[advisories]
+# Database URLs for security advisories
+db-urls = ["https://github.com/rustsec/advisory-db"]
+
+# Advisory severity levels to deny
+vulnerability = "deny"
+unmaintained = "warn"
+yanked = "deny"
+notice = "warn"
+
+# Ignore specific advisories (use carefully)
+ignore = [
+    # Add specific RUSTSEC IDs here if needed
+]
+
+[sources]
+# Only allow crates from these registries
+unknown-registry = "deny"
+unknown-git = "deny"
+
+# Allowed Git sources (if any)
+allow-git = []
+
+[graph]
+# Skip certain edges in dependency graph analysis
+skip-root = []

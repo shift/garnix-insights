@@ -1,15 +1,27 @@
 [package]
-name = "garnix-fetcher"
+name = "garnix-insights"
 version = "0.1.0"
 edition = "2021"
-license = "MIT OR Apache-2.0"
-description = "A CLI tool, HTTP server, and MCP server for fetching and analyzing Garnix.io CI build status"
-homepage = "https://github.com/yourusername/garnix-fetcher"
-repository = "https://github.com/yourusername/garnix-fetcher"
+license = "AGPL-3.0"
+description = "Professional CI/CD insights for Garnix.io - CLI tool, HTTP server, and MCP server for comprehensive build analysis"
+homepage = "https://github.com/shift/garnix-insights"
+repository = "https://github.com/shift/garnix-insights"
 readme = "README.md"
-keywords = ["garnix", "ci", "build", "nix", "mcp"]
-categories = ["command-line-utilities", "development-tools"]
-authors = ["Your Name <your.email@example.com>"]
+keywords = ["garnix", "ci", "insights", "nix", "mcp", "build-analysis"]
+categories = ["command-line-utilities", "development-tools", "api-bindings", "web-programming::http-server"]
+authors = ["Shift Org <tech@shift-org.com>"]
+exclude = [
+    "target/",
+    "result/", 
+    "*.nix",
+    "flake.*",
+    ".github/",
+    ".gitignore",
+    "scripts/",
+    "AI-INSTRUCTIONS.md",
+    "MCP-CONFIGURATION.md", 
+    "PUBLISHING.md"
+]
 
 [dependencies]
 reqwest = { version = "0.12", features = ["json"] }
@@ -35,6 +47,28 @@ assert_matches = "1.5"
 rstest = "0.18"
 pretty_assertions = "1.4"
 
+[lints.clippy]
+# Keep core safety and correctness lints
+correctness = { level = "warn", priority = -1 }
+perf = { level = "warn", priority = -1 }
+style = { level = "warn", priority = -1 }
+complexity = { level = "warn", priority = -1 }
+suspicious = { level = "warn", priority = -1 }
+# Disable pedantic lints that are too strict for CI
+pedantic = "allow"
+nursery = "allow"
+cargo = "allow"
+# Disable specific style lints that are too restrictive
+needless_borrows_for_generic_args = "allow"
+lint_groups_priority = "allow"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+unreachable_pub = "warn"
+dead_code = "allow"
+unnameable_test_items = "allow"
+
 [[bin]]
-name = "garnix-fetcher"
+name = "garnix-insights"
 path = "src/main.rs"

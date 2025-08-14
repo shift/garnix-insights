@@ -1,9 +1,9 @@
 //! HTTP client for interacting with the Garnix.io API
 
-use crate::types::{GarnixResponse, LogResponse};
 use crate::error::GarnixError;
+use crate::types::{GarnixResponse, LogResponse};
 use reqwest::{Client, StatusCode};
-use tracing::{info, warn, error};
+use tracing::{error, info, warn};
 
 /// HTTP client for Garnix.io API
 pub struct GarnixClient {
@@ -51,22 +51,27 @@ impl GarnixClient {
     }
 
     /// Fetch build status for a specific commit
-    /// 
+    ///
     /// # Arguments
     /// * `jwt_token` - JWT authentication token for Garnix.io API
     /// * `commit_id` - Git commit hash to fetch build status for
-    /// 
+    ///
     /// # Returns
     /// Returns a `GarnixResponse` containing build summary and individual build details
-    /// 
+    ///
     /// # Errors
     /// Returns `GarnixError` on network errors, authentication failures, or API errors
-    pub async fn fetch_build_status(&self, jwt_token: &str, commit_id: &str) -> Result<GarnixResponse, GarnixError> {
+    pub async fn fetch_build_status(
+        &self,
+        jwt_token: &str,
+        commit_id: &str,
+    ) -> Result<GarnixResponse, GarnixError> {
         info!("Fetching build status for commit: {}", commit_id);
-        
+
         let url = format!("{}/builds/{}", self.base_url, commit_id);
-        
-        let response = self.client
+
+        let response = self
+            .client
             .get(&url)
             .header("Authorization", format!("Bearer {}", jwt_token))
             .send()
@@ -81,52 +86,64 @@ impl GarnixClient {
 
         match status_code {
             StatusCode::OK => {
-                let garnix_response = response.json::<GarnixResponse>().await
-                    .map_err(|e| {
-                        error!("Failed to parse JSON response: {}", e);
-                        GarnixError::ParseError(e.to_string())
-                    })?;
-                
+                let garnix_response = response.json::<GarnixResponse>().await.map_err(|e| {
+                    error!("Failed to parse JSON response: {}", e);
+                    GarnixError::ParseError(e.to_string())
+                })?;
+
                 info!("Successfully fetched build status for commit {}", commit_id);
                 Ok(garnix_response)
-            },
+            }
             StatusCode::UNAUTHORIZED => {
                 error!("Authentication failed - invalid JWT token");
-                Err(GarnixError::AuthenticationError("Invalid JWT token".to_string()))
-            },
+                Err(GarnixError::AuthenticationError(
+                    "Invalid JWT token".to_string(),
+                ))
+            }
             StatusCode::NOT_FOUND => {
                 error!("Commit not found: {}", commit_id);
-                Err(GarnixError::NotFound(format!("Commit {} not found", commit_id)))
-            },
+                Err(GarnixError::NotFound(format!(
+                    "Commit {} not found",
+                    commit_id
+                )))
+            }
             StatusCode::TOO_MANY_REQUESTS => {
                 warn!("Rate limited by Garnix API");
                 Err(GarnixError::RateLimit("Rate limit exceeded".to_string()))
-            },
+            }
             _ => {
                 let error_text = response.text().await.unwrap_or_default();
                 error!("API error {}: {}", status_code, error_text);
-                Err(GarnixError::ApiError(format!("HTTP {}: {}", status_code, error_text)))
+                Err(GarnixError::ApiError(format!(
+                    "HTTP {}: {}",
+                    status_code, error_text
+                )))
             }
         }
     }
 
     /// Fetch build logs for a specific build
-    /// 
+    ///
     /// # Arguments
     /// * `jwt_token` - JWT authentication token for Garnix.io API
     /// * `build_id` - Unique build ID to fetch logs for
-    /// 
+    ///
     /// # Returns
     /// Returns a `LogResponse` containing log entries and completion status
-    /// 
+    ///
     /// # Errors
     /// Returns `GarnixError` on network errors, authentication failures, or API errors
-    pub async fn fetch_build_logs(&self, jwt_token: &str, build_id: &str) -> Result<LogResponse, GarnixError> {
+    pub async fn fetch_build_logs(
+        &self,
+        jwt_token: &str,
+        build_id: &str,
+    ) -> Result<LogResponse, GarnixError> {
         info!("Fetching build logs for build: {}", build_id);
-        
+
         let url = format!("{}/builds/{}/logs", self.base_url, build_id);
-        
-        let response = self.client
+
+        let response = self
+            .client
             .get(&url)
             .header("Authorization", format!("Bearer {}", jwt_token))
             .send()
@@ -141,49 +158,60 @@ impl GarnixClient {
 
         match status_code {
             StatusCode::OK => {
-                let log_response = response.json::<LogResponse>().await
-                    .map_err(|e| {
-                        error!("Failed to parse logs JSON response: {}", e);
-                        GarnixError::ParseError(e.to_string())
-                    })?;
-                
-                info!("Successfully fetched {} log entries for build {}", 
-                      log_response.logs.len(), build_id);
+                let log_response = response.json::<LogResponse>().await.map_err(|e| {
+                    error!("Failed to parse logs JSON response: {}", e);
+                    GarnixError::ParseError(e.to_string())
+                })?;
+
+                info!(
+                    "Successfully fetched {} log entries for build {}",
+                    log_response.logs.len(),
+                    build_id
+                );
                 Ok(log_response)
-            },
+            }
             StatusCode::UNAUTHORIZED => {
                 error!("Authentication failed - invalid JWT token");
-                Err(GarnixError::AuthenticationError("Invalid JWT token".to_string()))
-            },
+                Err(GarnixError::AuthenticationError(
+                    "Invalid JWT token".to_string(),
+                ))
+            }
             StatusCode::NOT_FOUND => {
                 error!("Build not found: {}", build_id);
-                Err(GarnixError::NotFound(format!("Build {} not found", build_id)))
-            },
+                Err(GarnixError::NotFound(format!(
+                    "Build {} not found",
+                    build_id
+                )))
+            }
             StatusCode::TOO_MANY_REQUESTS => {
                 warn!("Rate limited by Garnix API");
                 Err(GarnixError::RateLimit("Rate limit exceeded".to_string()))
-            },
+            }
             _ => {
                 let error_text = response.text().await.unwrap_or_default();
                 error!("Logs API error {}: {}", status_code, error_text);
-                Err(GarnixError::ApiError(format!("HTTP {}: {}", status_code, error_text)))
+                Err(GarnixError::ApiError(format!(
+                    "HTTP {}: {}",
+                    status_code, error_text
+                )))
             }
         }
     }
 
     /// Check if the API is accessible with the given token
-    /// 
+    ///
     /// # Arguments
     /// * `jwt_token` - JWT authentication token to validate
-    /// 
+    ///
     /// # Returns
     /// Returns `Ok(())` if the token is valid, `Err(GarnixError)` otherwise
     pub async fn validate_token(&self, jwt_token: &str) -> Result<(), GarnixError> {
         info!("Validating JWT token");
-        
+
         let url = format!("{}/user", self.base_url);
-        
-        let response = self.client
+
+        let response = self
+            .client
             .get(&url)
             .header("Authorization", format!("Bearer {}", jwt_token))
             .send()
@@ -197,15 +225,20 @@ impl GarnixClient {
             StatusCode::OK => {
                 info!("JWT token is valid");
                 Ok(())
-            },
+            }
             StatusCode::UNAUTHORIZED => {
                 error!("Invalid JWT token");
-                Err(GarnixError::AuthenticationError("Invalid JWT token".to_string()))
-            },
+                Err(GarnixError::AuthenticationError(
+                    "Invalid JWT token".to_string(),
+                ))
+            }
             status => {
                 let error_text = response.text().await.unwrap_or_default();
                 error!("Token validation error {}: {}", status, error_text);
-                Err(GarnixError::ApiError(format!("HTTP {}: {}", status, error_text)))
+                Err(GarnixError::ApiError(format!(
+                    "HTTP {}: {}",
+                    status, error_text
+                )))
             }
         }
     }
@@ -219,9 +252,9 @@ impl GarnixClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::types::Build;
     use mockito::Server;
     use serde_json::json;
-    use crate::types::Build;
     use std::collections::HashMap;
 
     fn create_test_build() -> Build {
@@ -240,7 +273,10 @@ mod tests {
             start_time: "2024-01-01T00:00:00Z".to_string(),
             end_time: "2024-01-01T00:01:00Z".to_string(),
             drv_path: Some("/nix/store/test.drv".to_string()),
-            output_paths: Some(HashMap::from([("out".to_string(), "/nix/store/test".to_string())])),
+            output_paths: Some(HashMap::from([(
+                "out".to_string(),
+                "/nix/store/test".to_string(),
+            )])),
             github_run_id: 12345,
             wants_incrementalism: false,
             eval_host: "eval.garnix.io".to_string(),
@@ -271,7 +307,8 @@ mod tests {
             "runs": []
         });
 
-        let _mock = server.mock("GET", "/builds/abc123")
+        let _mock = server
+            .mock("GET", "/builds/abc123")
             .match_header("authorization", "Bearer test-token")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -281,7 +318,7 @@ mod tests {
 
         let result = client.fetch_build_status("test-token", "abc123").await;
         assert!(result.is_ok());
-        
+
         let response = result.unwrap();
         assert_eq!(response.summary.git_commit, "abc123");
         assert_eq!(response.builds.len(), 1);
@@ -292,7 +329,8 @@ mod tests {
         let mut server = Server::new_async().await;
         let client = GarnixClient::with_base_url(server.url());
 
-        let _mock = server.mock("GET", "/builds/abc123")
+        let _mock = server
+            .mock("GET", "/builds/abc123")
             .match_header("authorization", "Bearer invalid-token")
             .with_status(401)
             .create_async()
@@ -307,7 +345,8 @@ mod tests {
         let mut server = Server::new_async().await;
         let client = GarnixClient::with_base_url(server.url());
 
-        let _mock = server.mock("GET", "/builds/nonexistent")
+        let _mock = server
+            .mock("GET", "/builds/nonexistent")
             .match_header("authorization", "Bearer test-token")
             .with_status(404)
             .create_async()
@@ -336,7 +375,8 @@ mod tests {
             ]
         });
 
-        let _mock = server.mock("GET", "/builds/test-build-1/logs")
+        let _mock = server
+            .mock("GET", "/builds/test-build-1/logs")
             .match_header("authorization", "Bearer test-token")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -346,7 +386,7 @@ mod tests {
 
         let result = client.fetch_build_logs("test-token", "test-build-1").await;
         assert!(result.is_ok());
-        
+
         let response = result.unwrap();
         assert!(response.finished);
         assert_eq!(response.logs.len(), 2);
@@ -358,7 +398,8 @@ mod tests {
         let mut server = Server::new_async().await;
         let client = GarnixClient::with_base_url(server.url());
 
-        let _mock = server.mock("GET", "/user")
+        let _mock = server
+            .mock("GET", "/user")
             .match_header("authorization", "Bearer valid-token")
             .with_status(200)
             .with_body(r#"{"username": "testuser"}"#)
@@ -374,7 +415,8 @@ mod tests {
         let mut server = Server::new_async().await;
         let client = GarnixClient::with_base_url(server.url());
 
-        let _mock = server.mock("GET", "/user")
+        let _mock = server
+            .mock("GET", "/user")
             .match_header("authorization", "Bearer invalid-token")
             .with_status(401)
             .create_async()

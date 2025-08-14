@@ -830,7 +830,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "garnix-fetcher"
+name = "garnix-insights"
 version = "0.1.0"
 dependencies = [
  "actix-web",

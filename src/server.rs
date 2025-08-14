@@ -10,7 +10,7 @@ use actix_web::{
 };
 use serde_json::json;
 use std::sync::Arc;
-use tracing::{info, error, warn};
+use tracing::{error, info, warn};
 
 /// HTTP server for Garnix Fetcher
 pub struct GarnixHttpServer {
@@ -71,7 +71,10 @@ impl GarnixHttpServer {
                     web::scope("/api/v1")
                         .route("/health", web::get().to(health_check))
                         .route("/build-status", web::post().to(get_build_status))
-                        .route("/build-status/{commit_id}", web::get().to(get_build_status_by_path))
+                        .route(
+                            "/build-status/{commit_id}",
+                            web::get().to(get_build_status_by_path),
+                        ),
                 )
                 .route("/", web::get().to(index))
                 .default_service(web::route().to(not_found))
@@ -128,9 +131,15 @@ async fn get_build_status(
         })));
     }
 
-    match client.fetch_build_status(&request.jwt_token, &request.commit_id).await {
+    match client
+        .fetch_build_status(&request.jwt_token, &request.commit_id)
+        .await
+    {
         Ok(response) => {
-            info!("Successfully fetched build status for commit: {}", request.commit_id);
+            info!(
+                "Successfully fetched build status for commit: {}",
+                request.commit_id
+            );
             Ok(HttpResponse::Ok().json(response))
         }
         Err(GarnixError::AuthenticationError(msg)) => {
@@ -288,7 +297,7 @@ async fn index() -> ActixResult<HttpResponse> {
     </body>
     </html>
     "#;
-    
+
     Ok(HttpResponse::Ok()
         .content_type("text/html; charset=utf-8")
         .body(html))
@@ -323,11 +332,15 @@ mod tests {
                     web::scope("/api/v1")
                         .route("/health", web::get().to(health_check))
                         .route("/build-status", web::post().to(get_build_status))
-                        .route("/build-status/{commit_id}", web::get().to(get_build_status_by_path))
+                        .route(
+                            "/build-status/{commit_id}",
+                            web::get().to(get_build_status_by_path),
+                        ),
                 )
                 .route("/", web::get().to(index))
-                .default_service(web::route().to(not_found))
-        ).await;
+                .default_service(web::route().to(not_found)),
+        )
+        .await;
     }
 
     #[actix_web::test]
@@ -336,14 +349,15 @@ mod tests {
         let app = test::init_service(
             App::new()
                 .app_data(Data::new(client))
-                .route("/health", web::get().to(health_check))
-        ).await;
+                .route("/health", web::get().to(health_check)),
+        )
+        .await;
 
         let req = test::TestRequest::get().uri("/health").to_request();
         let resp = test::call_service(&app, req).await;
-        
+
         assert!(resp.status().is_success());
-        
+
         let body: serde_json::Value = test::read_body_json(resp).await;
         assert_eq!(body["status"], "healthy");
         assert_eq!(body["service"], "garnix-fetcher");
@@ -355,14 +369,18 @@ mod tests {
         let app = test::init_service(
             App::new()
                 .app_data(Data::new(client))
-                .route("/", web::get().to(index))
-        ).await;
+                .route("/", web::get().to(index)),
+        )
+        .await;
 
         let req = test::TestRequest::get().uri("/").to_request();
         let resp = test::call_service(&app, req).await;
-        
+
         assert!(resp.status().is_success());
-        assert_eq!(resp.headers().get("content-type").unwrap(), "text/html; charset=utf-8");
+        assert_eq!(
+            resp.headers().get("content-type").unwrap(),
+            "text/html; charset=utf-8"
+        );
     }
 
     #[actix_web::test]
@@ -371,14 +389,15 @@ mod tests {
         let app = test::init_service(
             App::new()
                 .app_data(Data::new(client))
-                .default_service(web::route().to(not_found))
-        ).await;
+                .default_service(web::route().to(not_found)),
+        )
+        .await;
 
         let req = test::TestRequest::get().uri("/nonexistent").to_request();
         let resp = test::call_service(&app, req).await;
-        
+
         assert_eq!(resp.status(), 404);
-        
+
         let body: serde_json::Value = test::read_body_json(resp).await;
         assert_eq!(body["code"], "NOT_FOUND");
     }
@@ -389,8 +408,9 @@ mod tests {
         let app = test::init_service(
             App::new()
                 .app_data(Data::new(client))
-                .route("/build-status", web::post().to(get_build_status))
-        ).await;
+                .route("/build-status", web::post().to(get_build_status)),
+        )
+        .await;
 
         let req = test::TestRequest::post()
             .uri("/build-status")
@@ -399,10 +419,10 @@ mod tests {
                 "commit_id": "abc123"
             }))
             .to_request();
-        
+
         let resp = test::call_service(&app, req).await;
         assert_eq!(resp.status(), 400);
-        
+
         let body: serde_json::Value = test::read_body_json(resp).await;
         assert_eq!(body["code"], "MISSING_TOKEN");
     }
@@ -413,8 +433,9 @@ mod tests {
         let app = test::init_service(
             App::new()
                 .app_data(Data::new(client))
-                .route("/build-status", web::post().to(get_build_status))
-        ).await;
+                .route("/build-status", web::post().to(get_build_status)),
+        )
+        .await;
 
         let req = test::TestRequest::post()
             .uri("/build-status")
@@ -423,10 +444,10 @@ mod tests {
                 "commit_id": ""
             }))
             .to_request();
-        
+
         let resp = test::call_service(&app, req).await;
         assert_eq!(resp.status(), 400);
-        
+
         let body: serde_json::Value = test::read_body_json(resp).await;
         assert_eq!(body["code"], "MISSING_COMMIT_ID");
     }
@@ -437,8 +458,9 @@ mod tests {
         let app = test::init_service(
             App::new()
                 .app_data(Data::new(client))
-                .route("/build-status", web::post().to(get_build_status))
-        ).await;
+                .route("/build-status", web::post().to(get_build_status)),
+        )
+        .await;
 
         let req = test::TestRequest::post()
             .uri("/build-status")
@@ -447,10 +469,10 @@ mod tests {
                 "commit_id": "invalid-commit"
             }))
             .to_request();
-        
+
         let resp = test::call_service(&app, req).await;
         assert_eq!(resp.status(), 400);
-        
+
         let body: serde_json::Value = test::read_body_json(resp).await;
         assert_eq!(body["code"], "INVALID_COMMIT_ID");
     }
@@ -458,19 +480,19 @@ mod tests {
     #[actix_web::test]
     async fn test_build_status_by_path_missing_token() {
         let client = Arc::new(GarnixClient::new());
-        let app = test::init_service(
-            App::new()
-                .app_data(Data::new(client))
-                .route("/build-status/{commit_id}", web::get().to(get_build_status_by_path))
-        ).await;
+        let app = test::init_service(App::new().app_data(Data::new(client)).route(
+            "/build-status/{commit_id}",
+            web::get().to(get_build_status_by_path),
+        ))
+        .await;
 
         let req = test::TestRequest::get()
             .uri("/build-status/abc123456789")
             .to_request();
-        
+
         let resp = test::call_service(&app, req).await;
         assert_eq!(resp.status(), 400);
-        
+
         let body: serde_json::Value = test::read_body_json(resp).await;
         assert_eq!(body["code"], "MISSING_TOKEN");
     }
@@ -481,9 +503,7 @@ mod tests {
         assert_eq!(server.bind_address, "127.0.0.1");
         assert_eq!(server.port, 8080);
 
-        let server = GarnixHttpServer::new()
-            .bind_address("0.0.0.0")
-            .port(3000);
+        let server = GarnixHttpServer::new().bind_address("0.0.0.0").port(3000);
         assert_eq!(server.bind_address, "0.0.0.0");
         assert_eq!(server.port, 3000);
     }

@@ -121,7 +121,7 @@ impl GarnixError {
             GarnixError::ApiError(msg) => {
                 // Some API errors might be retryable (5xx status codes)
                 msg.contains("HTTP 5")
-            },
+            }
             _ => false,
         }
     }
@@ -136,7 +136,7 @@ impl GarnixError {
             GarnixError::ApiError(msg) => {
                 // 4xx client errors shouldn't be retried
                 msg.contains("HTTP 4")
-            },
+            }
             _ => false,
         }
     }
@@ -230,17 +230,17 @@ mod tests {
     #[test]
     fn test_error_from_conversions() {
         #[test]
-    fn test_error_from_conversions() {
-        // Test serde_json error conversion
-        let json_error = serde_json::from_str::<i32>("not a number").unwrap_err();
-        let garnix_error: GarnixError = json_error.into();
-        assert!(matches!(garnix_error, GarnixError::ParseError(_)));
+        fn test_error_from_conversions() {
+            // Test serde_json error conversion
+            let json_error = serde_json::from_str::<i32>("not a number").unwrap_err();
+            let garnix_error: GarnixError = json_error.into();
+            assert!(matches!(garnix_error, GarnixError::ParseError(_)));
 
-        // Test io error conversion
-        let io_error = std::io::Error::new(std::io::ErrorKind::NotFound, "File not found");
-        let garnix_error: GarnixError = io_error.into();
-        assert!(matches!(garnix_error, GarnixError::IoError(_)));
-    }
+            // Test io error conversion
+            let io_error = std::io::Error::new(std::io::ErrorKind::NotFound, "File not found");
+            let garnix_error: GarnixError = io_error.into();
+            assert!(matches!(garnix_error, GarnixError::IoError(_)));
+        }
 
         let anyhow_error = anyhow::anyhow!("Something went wrong");
         let garnix_error: GarnixError = anyhow_error.into();
