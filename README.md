@@ -48,6 +48,25 @@ Set your JWT token as an environment variable:
 export GARNIX_JWT_TOKEN="your_jwt_token_here"
 ```
 
+#### Getting Your JWT Token
+
+**Currently, the JWT token is only available through browser developer tools:**
+
+1. **Login to Garnix.io**: Go to https://garnix.io and log in to your account
+2. **Open Developer Tools**: Press F12 or right-click → "Inspect Element"
+3. **Go to Network Tab**: Click on the "Network" tab in developer tools
+4. **Make an API Request**: Navigate around the Garnix.io site to trigger API calls
+5. **Find API Request**: Look for requests to `api.garnix.io` in the network list
+6. **Copy JWT from Cookie**: 
+   - Click on any API request
+   - Go to "Request Headers" section
+   - Find the `Cookie` header
+   - Copy the JWT value from the cookie
+
+**Note**: This method is not ideal - I've reached out to the Garnix.io maintainers about providing a better solution for API access. Thanks to @lassulus for helping connect me with the team!
+
+#### Commands
+
 Check build status for a commit:
 
 ```bash
