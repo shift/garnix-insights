@@ -77,7 +77,7 @@
 - **Mock Testing**: External API calls mocked for reliability
 - **Doc Tests**: Examples in documentation are tested
 
-## 🚀 Features Implemented
+## Features Implemented
 
 ### CLI Commands
 - `fetch` - Fetch build status for a specific commit

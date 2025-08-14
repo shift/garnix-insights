@@ -228,4 +228,4 @@ Releases are automated via [release-please](https://github.com/googleapis/releas
 
 Contributors are automatically added to the repository's contributor list. Significant contributions may be recognized in release notes and project documentation.
 
-Thank you for contributing to Garnix Insights! 🚀
+Thank you for contributing to Garnix Insights!
