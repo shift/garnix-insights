@@ -9,7 +9,6 @@ A multi-mode Rust application for CI/CD insights from Garnix.io. Available as a 
 - **Output Formats**: Human-readable, JSON, and plain text
 - **AI Assistant Integration**: Full MCP support for GitHub Copilot, Claude, and other AI tools
 - **Error Handling**: Graceful handling of API failures and network issues
-- **Security Focused**: AGPL-3.0 licensed with dependency auditing
 
 ## Installation
 
