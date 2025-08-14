@@ -1,8 +1,15 @@
 [package]
 name = "garnix-fetcher"
 version = "0.1.0"
-edition = "2024"
+edition = "2021"
 license = "MIT OR Apache-2.0"
+description = "A CLI tool, HTTP server, and MCP server for fetching and analyzing Garnix.io CI build status"
+homepage = "https://github.com/yourusername/garnix-fetcher"
+repository = "https://github.com/yourusername/garnix-fetcher"
+readme = "README.md"
+keywords = ["garnix", "ci", "build", "nix", "mcp"]
+categories = ["command-line-utilities", "development-tools"]
+authors = ["Your Name <your.email@example.com>"]
 
 [dependencies]
 reqwest = { version = "0.12", features = ["json"] }
@@ -11,3 +18,23 @@ serde_json = "1.0"
 tokio = { version = "1.0", features = ["full"] }
 actix-web = "4"
 anyhow = "1.0"
+# rmcp = "0.2"  # Temporarily disabled due to API compatibility issues
+tracing = "0.1"
+tracing-subscriber = "0.3"
+# async-trait = "0.1"  # Only needed for MCP server
+schemars = { version = "0.8", features = ["derive"] }
+clap = { version = "4.0", features = ["derive", "env"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+[dev-dependencies]
+tokio-test = "0.4"
+mockito = "1.4"
+wiremock = "0.6"
+tempfile = "3.0"
+assert_matches = "1.5"
+rstest = "0.18"
+pretty_assertions = "1.4"
+
+[[bin]]
+name = "garnix-fetcher"
+path = "src/main.rs"
