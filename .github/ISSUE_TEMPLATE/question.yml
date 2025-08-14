@@ -1,0 +1,66 @@
+name: ❓ Question
+description: Ask a question about Garnix Insights
+title: "question: "
+labels: ["question", "needs-triage"]
+assignees: ["shift"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help! Consider checking our [Discussions](https://github.com/shift/garnix-insights/discussions) first.
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know?
+      placeholder: Ask your question here...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Question Category
+      description: What's your question about?
+      options:
+        - Installation and setup
+        - CLI usage
+        - HTTP server configuration
+        - MCP server setup
+        - Garnix API integration
+        - Development and contributing
+        - Troubleshooting
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context
+      placeholder: |
+        - What are you trying to accomplish?
+        - What have you tried so far?
+        - Any error messages or unexpected behavior?
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment (if relevant)
+      placeholder: |
+        - OS: 
+        - Nix version: 
+        - Garnix Insights version: 
+        - Usage mode: 
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I have checked the documentation (README, GUIDE, etc.)
+          required: true
+        - label: I have searched existing issues and discussions
+          required: true

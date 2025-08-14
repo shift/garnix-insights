@@ -50,9 +50,9 @@ To create a Rust-based AI Multi-Cloud Platform (MCP) server that allows other AI
 - Keep `Cargo.lock` updated by running `nix develop -c -- cargo update` after modifying `Cargo.toml`.
 - Prefer well-maintained and widely used crates (e.g., `reqwest` for HTTP, `serde` for serialization/deserialization, `actix-web` for web server).
 
-### 3.4. Code Organization
+### 3.4. Code Organisation
 
-- Organize code into logical modules and functions.
+- Organise code into logical modules and functions.
 - Separate concerns (e.g., API interaction logic from server setup logic).
 - Use clear and descriptive naming for variables, functions, and types.
 

@@ -32,9 +32,14 @@ impl GarnixMcpServer {
 
     /// Run the MCP server on stdio transport (currently disabled)
     pub async fn run_stdio(self) -> GarnixResult<()> {
-        eprintln!("MCP server functionality is currently disabled");
-        eprintln!("This feature will be available in a future version");
-        std::process::exit(1);
+        use crate::error::GarnixError;
+        
+        tracing::warn!("MCP server functionality is currently disabled");
+        tracing::warn!("This feature will be available in a future version");
+        
+        Err(GarnixError::ConfigError(
+            "MCP server functionality is currently disabled".to_string()
+        ))
     }
 }
 
@@ -54,5 +59,28 @@ mod tests {
         let client = GarnixClient::new();
         let server = GarnixMcpServer::with_client(client);
         drop(server);
+    }
+
+    #[test]
+    fn test_default_implementation() {
+        let server1 = GarnixMcpServer::new();
+        let server2 = GarnixMcpServer::default();
+        
+        // Both should be created successfully
+        drop(server1);
+        drop(server2);
+    }
+
+    #[tokio::test]
+    async fn test_run_stdio_returns_error() {
+        let server = GarnixMcpServer::new();
+        
+        // This should return an error since MCP is currently disabled
+        let result = server.run_stdio().await;
+        assert!(result.is_err());
+        
+        if let Err(e) = result {
+            assert!(e.to_string().contains("MCP server functionality is currently disabled"));
+        }
     }
 }
