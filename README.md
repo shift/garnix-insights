@@ -136,7 +136,7 @@ Add to your configuration file:
 }
 ```
 
-For comprehensive setup instructions, see [MCP-CONFIGURATION.md](MCP-CONFIGURATION.md).
+For setup instructions, see [MCP-CONFIGURATION.md](MCP-CONFIGURATION.md).
 
 ## Development
 
@@ -161,7 +161,7 @@ cargo test
 # Build for development  
 cargo build
 
-# Run comprehensive CI checks
+# Run CI checks
 nix flake check
 ```
 
@@ -181,5 +181,5 @@ This project is licensed under **AGPL-3.0** with commercial approval requirement
 ## Support
 
 - **Issues**: https://github.com/shift/garnix-insights/issues
-- **Documentation**: Complete guides in [AI-INSTRUCTIONS.md](AI-INSTRUCTIONS.md) and [MCP-CONFIGURATION.md](MCP-CONFIGURATION.md)
+- **Documentation**: Guides in [AI-INSTRUCTIONS.md](AI-INSTRUCTIONS.md) and [MCP-CONFIGURATION.md](MCP-CONFIGURATION.md)
 - **Contributing**: Follow standard Rust/Nix contribution practices
