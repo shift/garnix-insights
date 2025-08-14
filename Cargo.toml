@@ -8,8 +8,8 @@ homepage = "https://github.com/shift/garnix-insights"
 repository = "https://github.com/shift/garnix-insights"
 readme = "README.md"
 keywords = ["garnix", "ci", "insights", "nix", "mcp"]
-categories = ["command-line-utilities", "development-tools", "api-bindings", "web-programming::http-server"]
-authors = ["Shift Org <tech@shift-org.com>"]
+categories = ["command-line-utilities", "development-tools", "api-bindings"]
+authors = ["Vincent Palmer <shift@someone.section.me>"]
 exclude = [
     "target/",
     "result/", 
