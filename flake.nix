@@ -56,6 +56,8 @@
             rustc 
             cargo 
             gcc 
+            pkg-config
+            openssl
           ]; 
         }; 
  
