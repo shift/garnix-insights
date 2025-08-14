@@ -526,7 +526,7 @@ mod tests {
         // Test that the response can be serialised to JSON without error
         let json_result = serde_json::to_string_pretty(&response);
         assert!(json_result.is_ok());
-        
+
         let json_string = json_result.unwrap();
         assert!(json_string.contains("7a2f5e9c1b4d8a3e6f2a9e5c8b1d4f7a3c6e9b2d")); // commit ID
         assert!(json_string.contains("testuser")); // repo owner
@@ -541,11 +541,14 @@ mod tests {
             format: OutputFormat::Json,
             command: Some(Commands::Mcp),
         };
-        
+
         assert!(cli.verbose);
         assert!(matches!(cli.format, OutputFormat::Json));
         assert_eq!(cli.jwt_token, Some("token".to_string()));
-        assert_eq!(cli.commit_id, Some("8b3e6f1a4c9d2e7a5f8b1e4a7c2f5e9a6b3d8f1a".to_string()));
+        assert_eq!(
+            cli.commit_id,
+            Some("8b3e6f1a4c9d2e7a5f8b1e4a7c2f5e9a6b3d8f1a".to_string())
+        );
     }
 
     #[tokio::test]
@@ -572,7 +575,7 @@ mod tests {
         let _human = OutputFormat::Human;
         let _json = OutputFormat::Json;
         let _plain = OutputFormat::Plain;
-        
+
         // Test Debug trait
         assert!(!format!("{:?}", OutputFormat::Human).is_empty());
         assert!(!format!("{:?}", OutputFormat::Json).is_empty());
