@@ -5,7 +5,7 @@ use crate::error::{GarnixError, GarnixResult};
 use crate::mcp::GarnixMcpServer;
 use crate::server::GarnixHttpServer;
 use clap::{Parser, Subcommand};
-use tracing::{info, error};
+use tracing::{error, info};
 
 /// Garnix Fetcher - Fetch CI build status from Garnix.io
 #[derive(Parser, Debug)]
@@ -100,19 +100,22 @@ impl Cli {
             tracing::Level::INFO
         };
 
-        tracing_subscriber::fmt()
-            .with_max_level(level)
-            .init();
+        tracing_subscriber::fmt().with_max_level(level).init();
 
         info!("Starting Garnix Fetcher v{}", env!("CARGO_PKG_VERSION"));
 
         let client = GarnixClient::new();
 
         match &self.command {
-            Some(Commands::Fetch { jwt_token, commit_id }) => {
-                let token = jwt_token.as_ref().or(self.jwt_token.as_ref())
+            Some(Commands::Fetch {
+                jwt_token,
+                commit_id,
+            }) => {
+                let token = jwt_token
+                    .as_ref()
+                    .or(self.jwt_token.as_ref())
                     .ok_or_else(|| GarnixError::ConfigError("JWT token is required".to_string()))?;
-                
+
                 self.fetch_build_status(&client, token, commit_id).await
             }
             Some(Commands::Server { bind_address, port }) => {
@@ -130,9 +133,10 @@ impl Cli {
             Some(Commands::ValidateToken { jwt_token }) => {
                 self.validate_token(&client, jwt_token).await
             }
-            Some(Commands::Logs { jwt_token, build_id }) => {
-                self.fetch_build_logs(&client, jwt_token, build_id).await
-            }
+            Some(Commands::Logs {
+                jwt_token,
+                build_id,
+            }) => self.fetch_build_logs(&client, jwt_token, build_id).await,
             None => {
                 // Default behavior - try to fetch build status if we have the required args
                 match (&self.jwt_token, &self.commit_id) {
@@ -142,7 +146,8 @@ impl Cli {
                     _ => {
                         error!("No command specified and missing required arguments");
                         Err(GarnixError::ConfigError(
-                            "Either specify a subcommand or provide --jwt-token and --commit-id".to_string()
+                            "Either specify a subcommand or provide --jwt-token and --commit-id"
+                                .to_string(),
                         ))
                     }
                 }
@@ -151,9 +156,14 @@ impl Cli {
     }
 
     /// Fetch and display build status
-    async fn fetch_build_status(&self, client: &GarnixClient, jwt_token: &str, commit_id: &str) -> GarnixResult<()> {
+    async fn fetch_build_status(
+        &self,
+        client: &GarnixClient,
+        jwt_token: &str,
+        commit_id: &str,
+    ) -> GarnixResult<()> {
         info!("Fetching build status for commit: {}", commit_id);
-        
+
         let response = client.fetch_build_status(jwt_token, commit_id).await?;
 
         match self.format {
@@ -174,7 +184,7 @@ impl Cli {
     /// Validate JWT token
     async fn validate_token(&self, client: &GarnixClient, jwt_token: &str) -> GarnixResult<()> {
         info!("Validating JWT token");
-        
+
         match client.validate_token(jwt_token).await {
             Ok(_) => {
                 match self.format {
@@ -202,9 +212,14 @@ impl Cli {
     }
 
     /// Fetch and display build logs
-    async fn fetch_build_logs(&self, client: &GarnixClient, jwt_token: &str, build_id: &str) -> GarnixResult<()> {
+    async fn fetch_build_logs(
+        &self,
+        client: &GarnixClient,
+        jwt_token: &str,
+        build_id: &str,
+    ) -> GarnixResult<()> {
         info!("Fetching build logs for build: {}", build_id);
-        
+
         let response = client.fetch_build_logs(jwt_token, build_id).await?;
 
         match self.format {
@@ -215,9 +230,12 @@ impl Cli {
                 if response.logs.is_empty() {
                     println!("No logs available for build {}", build_id);
                 } else {
-                    println!("Logs for build {} (finished: {}):", build_id, response.finished);
+                    println!(
+                        "Logs for build {} (finished: {}):",
+                        build_id, response.finished
+                    );
                     println!("{}", "=".repeat(60));
-                    
+
                     for log_entry in &response.logs {
                         println!("[{}] {}", log_entry.timestamp, log_entry.log_message);
                     }
@@ -238,7 +256,12 @@ impl Cli {
         if response.summary.failed > 0 {
             println!("\n🔍 Failed Builds:");
             for build in response.failed_builds() {
-                println!("  • {} ({}): {}", build.package, build.system.as_deref().unwrap_or("unknown"), build.status_with_emoji());
+                println!(
+                    "  • {} ({}): {}",
+                    build.package,
+                    build.system.as_deref().unwrap_or("unknown"),
+                    build.status_with_emoji()
+                );
                 if let Some(drv_path) = &build.drv_path {
                     println!("    Derivation: {}", drv_path);
                 }
@@ -247,18 +270,27 @@ impl Cli {
 
         // Print success rate
         let success_rate = response.success_rate();
-        let emoji = if success_rate == 100.0 { "🎉" } else if success_rate >= 80.0 { "👍" } else { "⚠️" };
+        let emoji = if success_rate == 100.0 {
+            "🎉"
+        } else if success_rate >= 80.0 {
+            "👍"
+        } else {
+            "⚠️"
+        };
         println!("\n{} Success Rate: {:.1}%", emoji, success_rate);
     }
 
     /// Print build status in plain text format
     fn print_plain_text(&self, response: &crate::types::GarnixResponse) {
         println!("Build Status for {}", response.summary.git_commit);
-        println!("Repository: {}/{}", response.summary.repo_owner, response.summary.repo_name);
+        println!(
+            "Repository: {}/{}",
+            response.summary.repo_owner, response.summary.repo_name
+        );
         println!("Branch: {}", response.summary.branch);
         println!("Started: {}", response.summary.start_time);
         println!();
-        
+
         println!("Summary:");
         println!("  Succeeded: {}", response.summary.succeeded);
         println!("  Failed: {}", response.summary.failed);
@@ -269,9 +301,10 @@ impl Cli {
         if !response.builds.is_empty() {
             println!("Individual Builds:");
             for build in &response.builds {
-                println!("  {} - {} ({})", 
-                    build.package, 
-                    build.status, 
+                println!(
+                    "  {} - {} ({})",
+                    build.package,
+                    build.status,
                     build.system.as_deref().unwrap_or("unknown")
                 );
             }
@@ -284,7 +317,7 @@ impl Cli {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::{Summary, Build, GarnixResponse};
+    use crate::types::{Build, GarnixResponse, Summary};
 
     fn create_test_response() -> GarnixResponse {
         GarnixResponse {
@@ -352,14 +385,20 @@ mod tests {
     #[test]
     fn test_cli_parsing() {
         let cli = Cli::try_parse_from(&[
-            "garnix-fetcher", 
+            "garnix-fetcher",
             "fetch",
-            "--jwt-token", "test-token",
-            "--commit-id", "abc123"
-        ]).unwrap();
+            "--jwt-token",
+            "test-token",
+            "--commit-id",
+            "abc123",
+        ])
+        .unwrap();
 
         match cli.command.unwrap() {
-            Commands::Fetch { jwt_token, commit_id } => {
+            Commands::Fetch {
+                jwt_token,
+                commit_id,
+            } => {
                 assert_eq!(jwt_token.unwrap(), "test-token");
                 assert_eq!(commit_id, "abc123");
             }
@@ -370,11 +409,14 @@ mod tests {
     #[test]
     fn test_cli_server_parsing() {
         let cli = Cli::try_parse_from(&[
-            "garnix-fetcher", 
+            "garnix-fetcher",
             "server",
-            "--bind-address", "0.0.0.0",
-            "--port", "3000"
-        ]).unwrap();
+            "--bind-address",
+            "0.0.0.0",
+            "--port",
+            "3000",
+        ])
+        .unwrap();
 
         match cli.command.unwrap() {
             Commands::Server { bind_address, port } => {
@@ -387,10 +429,7 @@ mod tests {
 
     #[test]
     fn test_cli_mcp_parsing() {
-        let cli = Cli::try_parse_from(&[
-            "garnix-fetcher", 
-            "mcp"
-        ]).unwrap();
+        let cli = Cli::try_parse_from(&["garnix-fetcher", "mcp"]).unwrap();
 
         assert!(matches!(cli.command.unwrap(), Commands::Mcp));
     }
@@ -398,10 +437,12 @@ mod tests {
     #[test]
     fn test_cli_validate_token_parsing() {
         let cli = Cli::try_parse_from(&[
-            "garnix-fetcher", 
+            "garnix-fetcher",
             "validate-token",
-            "--jwt-token", "test-token"
-        ]).unwrap();
+            "--jwt-token",
+            "test-token",
+        ])
+        .unwrap();
 
         match cli.command.unwrap() {
             Commands::ValidateToken { jwt_token } => {
@@ -414,14 +455,20 @@ mod tests {
     #[test]
     fn test_cli_logs_parsing() {
         let cli = Cli::try_parse_from(&[
-            "garnix-fetcher", 
+            "garnix-fetcher",
             "logs",
-            "--jwt-token", "test-token",
-            "--build-id", "build123"
-        ]).unwrap();
+            "--jwt-token",
+            "test-token",
+            "--build-id",
+            "build123",
+        ])
+        .unwrap();
 
         match cli.command.unwrap() {
-            Commands::Logs { jwt_token, build_id } => {
+            Commands::Logs {
+                jwt_token,
+                build_id,
+            } => {
                 assert_eq!(jwt_token, "test-token");
                 assert_eq!(build_id, "build123");
             }
@@ -433,22 +480,22 @@ mod tests {
     fn test_output_format_parsing() {
         let cli = Cli::try_parse_from(&[
             "garnix-fetcher",
-            "--format", "json",
+            "--format",
+            "json",
             "fetch",
-            "--jwt-token", "test",
-            "--commit-id", "abc123"
-        ]).unwrap();
+            "--jwt-token",
+            "test",
+            "--commit-id",
+            "abc123",
+        ])
+        .unwrap();
 
         assert!(matches!(cli.format, OutputFormat::Json));
     }
 
     #[test]
     fn test_verbose_flag() {
-        let cli = Cli::try_parse_from(&[
-            "garnix-fetcher",
-            "--verbose",
-            "mcp"
-        ]).unwrap();
+        let cli = Cli::try_parse_from(&["garnix-fetcher", "--verbose", "mcp"]).unwrap();
 
         assert!(cli.verbose);
     }
@@ -457,7 +504,7 @@ mod tests {
     fn test_print_human_readable() {
         let cli = Cli::try_parse_from(&["garnix-fetcher", "mcp"]).unwrap();
         let response = create_test_response();
-        
+
         // This test mainly ensures the method doesn't panic
         // In a real test environment, you might capture stdout to verify output
         cli.print_human_readable(&response);
@@ -467,7 +514,7 @@ mod tests {
     fn test_print_plain_text() {
         let cli = Cli::try_parse_from(&["garnix-fetcher", "mcp"]).unwrap();
         let response = create_test_response();
-        
+
         // This test mainly ensures the method doesn't panic
         cli.print_plain_text(&response);
     }

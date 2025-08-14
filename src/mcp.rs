@@ -1,5 +1,5 @@
 //! Model Context Protocol (MCP) server implementation for Garnix Fetcher
-//! 
+//!
 //! This module provides MCP server functionality but is currently disabled
 //! due to API incompatibilities. It will be enabled once the proper rmcp version is available.
 
@@ -27,9 +27,7 @@ impl GarnixMcpServer {
 
     /// Create a new MCP server with custom Garnix client
     pub fn with_client(client: GarnixClient) -> Self {
-        Self {
-            _client: client,
-        }
+        Self { _client: client }
     }
 
     /// Run the MCP server on stdio transport (currently disabled)

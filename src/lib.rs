@@ -1,6 +1,6 @@
-//! # Garnix Fetcher Library
+//! # Garnix Insights Library
 //!
-//! A Rust library for fetching build status information from Garnix.io.
+//! A Rust library for analyzing build status information from Garnix.io.
 //! This library provides functionality to query Garnix build status, format results,
 //! and interact with the Garnix API through various interfaces including CLI, HTTP server,
 //! and Model Context Protocol (MCP) server.
@@ -18,7 +18,7 @@
 //! ## Quick Start
 //!
 //! ```rust,no_run
-//! use garnix_fetcher::{get_garnix_data, format_build_summary};
+//! use garnix_insights::{get_garnix_data, format_build_summary};
 //!
 //! #[tokio::main]
 //! async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -41,27 +41,27 @@ pub use error::{GarnixError, GarnixResult};
 pub use types::{Build, GarnixRequest, GarnixResponse, Summary};
 
 /// The main function to fetch Garnix data for a given commit
-/// 
+///
 /// This is a convenience function that creates a new `GarnixClient` and fetches
 /// build status for the specified commit.
-/// 
+///
 /// # Arguments
 /// * `jwt_token` - The JWT authentication token for Garnix.io
 /// * `commit_id` - The Git commit ID to fetch build status for
-/// 
+///
 /// # Returns
 /// A `GarnixResult<GarnixResponse>` containing the build status information
-/// 
+///
 /// # Errors
 /// Returns an error if:
 /// * The JWT token is invalid or expired
 /// * The commit ID is not found in the repository  
 /// * Network or API communication fails
 /// * JSON parsing fails
-/// 
+///
 /// # Example
 /// ```rust,no_run
-/// # use garnix_fetcher::get_garnix_data;
+/// # use garnix_insights::get_garnix_data;
 /// # tokio_test::block_on(async {
 /// let response = get_garnix_data("jwt-token", "abc123").await?;
 /// println!("Repository: {}/{}", response.summary.repo_owner, response.summary.repo_name);
@@ -74,19 +74,19 @@ pub async fn get_garnix_data(jwt_token: &str, commit_id: &str) -> GarnixResult<G
 }
 
 /// Format a build summary as a human-readable string
-/// 
+///
 /// Creates a markdown-formatted summary of the build status including
 /// repository information, branch, timing, and success/failure counts.
-/// 
+///
 /// # Arguments
 /// * `response` - The Garnix response to format
-/// 
+///
 /// # Returns
 /// A formatted string containing the build summary
-/// 
+///
 /// # Example
 /// ```rust
-/// # use garnix_fetcher::{types::*, format_build_summary};
+/// # use garnix_insights::{types::*, format_build_summary};
 /// # use std::collections::HashMap;
 /// let response = GarnixResponse {
 ///     summary: Summary {
@@ -132,19 +132,19 @@ pub fn format_build_summary(response: &GarnixResponse) -> String {
 }
 
 /// Format build details as a human-readable string
-/// 
+///
 /// Creates a detailed markdown-formatted list of all individual builds,
 /// including status, system information, timing, and build IDs.
-/// 
+///
 /// # Arguments
 /// * `builds` - Vector of builds to format
-/// 
+///
 /// # Returns
 /// A formatted string containing detailed build information
-/// 
+///
 /// # Example
 /// ```rust
-/// # use garnix_fetcher::{types::Build, format_build_details};
+/// # use garnix_insights::{types::Build, format_build_details};
 /// # use std::collections::HashMap;
 /// let builds = vec![
 ///     Build {
@@ -178,7 +178,7 @@ pub fn format_build_details(builds: &[Build]) -> String {
     }
 
     let mut build_details = String::from("\n## Individual Builds\n");
-    
+
     for build in builds {
         build_details.push_str(&format!(
             "### {}\n\
@@ -186,24 +186,24 @@ pub fn format_build_details(builds: &[Build]) -> String {
             build.package,
             build.status_with_emoji()
         ));
-        
+
         if let Some(system) = &build.system {
             build_details.push_str(&format!("- **System:** {}\n", system));
         }
-        
+
         build_details.push_str(&format!(
             "- **Duration:** {} → {}\n\
              - **Build ID:** {}\n\n",
             build.start_time, build.end_time, build.id
         ));
-        
+
         if build.is_failed() {
             if let Some(drv_path) = &build.drv_path {
                 build_details.push_str(&format!("- **Derivation:** {}\n", drv_path));
             }
         }
     }
-    
+
     build_details
 }
 
@@ -280,7 +280,7 @@ mod tests {
         // This is an integration test that would require a mock server
         // For now, we'll just test that the function exists and can be called
         // In a real test, we'd use mockito to mock the HTTP responses
-        
+
         // let response = get_garnix_data("test-token", "test-commit").await;
         // We can't test this without mocking, so we'll skip the actual call
     }
@@ -289,7 +289,7 @@ mod tests {
     fn test_format_build_summary() {
         let response = create_test_response();
         let formatted = format_build_summary(&response);
-        
+
         assert!(formatted.contains("# Build Summary for abc123de"));
         assert!(formatted.contains("testowner/testrepo"));
         assert!(formatted.contains("**Branch:** main"));
@@ -301,7 +301,7 @@ mod tests {
     fn test_format_build_details() {
         let response = create_test_response();
         let formatted = format_build_details(&response.builds);
-        
+
         assert!(formatted.contains("## Individual Builds"));
         assert!(formatted.contains("### package1"));
         assert!(formatted.contains("✅ Success"));

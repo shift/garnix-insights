@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-/// Request parameters for fetching Garnix build status
+/// Request parameter for fetching Garnix build status
 #[derive(Debug, Deserialize, Serialize, schemars::JsonSchema, Clone)]
 pub struct GarnixRequest {
     /// JWT authentication token for Garnix.io API access
@@ -121,7 +121,7 @@ pub struct BuildStatusRequest {
 }
 
 /// Build status enumeration for type safety
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BuildStatus {
     /// Build completed successfully
     Success,
@@ -138,11 +138,11 @@ pub enum BuildStatus {
 impl From<&str> for BuildStatus {
     fn from(status: &str) -> Self {
         match status {
-            "Success" => BuildStatus::Success,
-            "Failed" => BuildStatus::Failed,
-            "Pending" => BuildStatus::Pending,
-            "Cancelled" => BuildStatus::Cancelled,
-            other => BuildStatus::Other(other.to_string()),
+            "Success" => Self::Success,
+            "Failed" => Self::Failed,
+            "Pending" => Self::Pending,
+            "Cancelled" => Self::Cancelled,
+            other => Self::Other(other.to_string()),
         }
     }
 }
@@ -196,17 +196,26 @@ impl Build {
 impl GarnixResponse {
     /// Get all failed builds
     pub fn failed_builds(&self) -> Vec<&Build> {
-        self.builds.iter().filter(|build| build.is_failed()).collect()
+        self.builds
+            .iter()
+            .filter(|build| build.is_failed())
+            .collect()
     }
 
     /// Get all successful builds
     pub fn successful_builds(&self) -> Vec<&Build> {
-        self.builds.iter().filter(|build| build.is_successful()).collect()
+        self.builds
+            .iter()
+            .filter(|build| build.is_successful())
+            .collect()
     }
 
     /// Get all pending builds
     pub fn pending_builds(&self) -> Vec<&Build> {
-        self.builds.iter().filter(|build| build.is_pending()).collect()
+        self.builds
+            .iter()
+            .filter(|build| build.is_pending())
+            .collect()
     }
 
     /// Calculate success rate as a percentage
@@ -233,14 +242,20 @@ mod tests {
         assert_eq!(BuildStatus::from("Failed"), BuildStatus::Failed);
         assert_eq!(BuildStatus::from("Pending"), BuildStatus::Pending);
         assert_eq!(BuildStatus::from("Cancelled"), BuildStatus::Cancelled);
-        assert_eq!(BuildStatus::from("Unknown"), BuildStatus::Other("Unknown".to_string()));
+        assert_eq!(
+            BuildStatus::from("Unknown"),
+            BuildStatus::Other("Unknown".to_string())
+        );
     }
 
     #[test]
     fn test_build_status_display() {
         assert_eq!(BuildStatus::Success.to_string(), "Success");
         assert_eq!(BuildStatus::Failed.to_string(), "Failed");
-        assert_eq!(BuildStatus::Other("Custom".to_string()).to_string(), "Custom");
+        assert_eq!(
+            BuildStatus::Other("Custom".to_string()).to_string(),
+            "Custom"
+        );
     }
 
     #[test]
@@ -364,6 +379,6 @@ mod tests {
         };
 
         assert!(response.all_successful());
-        assert_eq!(response.success_rate(), 100.0);
+        assert!((response.success_rate() - 100.0).abs() < f64::EPSILON);
     }
 }
