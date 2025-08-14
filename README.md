@@ -183,3 +183,4 @@ This project is licensed under **AGPL-3.0** with commercial approval requirement
 - **Issues**: https://github.com/shift/garnix-insights/issues
 - **Documentation**: Guides in [AI-INSTRUCTIONS.md](AI-INSTRUCTIONS.md) and [MCP-CONFIGURATION.md](MCP-CONFIGURATION.md)
 - **Contributing**: Follow standard Rust/Nix contribution practices
+# Clean release trigger
