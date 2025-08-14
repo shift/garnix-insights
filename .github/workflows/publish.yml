@@ -25,6 +25,8 @@ jobs:
         extra_nix_config: |
           experimental-features = nix-command flakes
           accept-flake-config = true
+          substituters = https://cache.garnix.io https://cache.nixos.org/
+          trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqc40= cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY=
         
     - name: Run tests
       run: nix flake check
@@ -42,14 +44,18 @@ jobs:
         
     - name: Create GitHub Release
       if: startsWith(github.ref, 'refs/tags/v')
-      uses: actions/create-release@v1
+      uses: softprops/action-gh-release@v2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref_name }}
-        release_name: Release ${{ github.ref_name }}
+        name: garnix-insights ${{ github.ref_name }}
         body: |
-          ## Installation
+          ## garnix-insights ${{ github.ref_name }}
+          
+          CI/CD insights for Garnix.io - CLI tool, HTTP server, and MCP server for build analysis.
+          
+          ### Installation
           
           ```bash
           cargo install garnix-insights
@@ -60,5 +66,15 @@ jobs:
           ```bash
           nix profile install github:shift/garnix-insights
           ```
+          
+          ### Usage Modes
+          - **CLI**: Direct build status checking
+          - **HTTP Server**: REST API for integration  
+          - **MCP Server**: Model Context Protocol support
+          
+          ### Documentation
+          - [README.md](https://github.com/shift/garnix-insights/blob/main/README.md)
+          - [MCP Configuration](https://github.com/shift/garnix-insights/blob/main/MCP-CONFIGURATION.md)
         draft: false
         prerelease: false
+        generate_release_notes: true
