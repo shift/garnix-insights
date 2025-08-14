@@ -130,7 +130,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> { // main is now synchronous
 
             let jwt_token = &args[1];
             let commit_id = &args[2];
-            let mut package_names: Vec<String> = Vec::new();
+            let package_names: Vec<String> = Vec::new();
             let mut json_output = false;
 
             // Parse optional arguments for CLI
