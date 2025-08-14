@@ -19,8 +19,12 @@
   - Stage and commit all changes to files referenced by `flake.nix` (including `Cargo.toml`, `Cargo.lock`, `src/main.rs`).
 - **To build the CLI:**
   - `nix build .#default` (output in `result/bin/garnix-fetcher`).
-- **To run the server (if implemented):**
-  - `nix run .#server`
+- **To run directly:**
+  - CLI: `nix run .#default -- <JWT_TOKEN> <COMMIT_ID>`
+  - Server: `nix run .#server`
+- **Development verification:**
+  - Use `nix develop -c -- cargo check` for quick compilation check.
+  - Use `nix develop -c -- cargo build` for full build in development mode.
 
 ## Rust Conventions
 - Use `tokio` for async runtime; main entrypoint should use `block_on` for async logic.
