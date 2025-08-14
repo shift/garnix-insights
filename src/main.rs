@@ -82,7 +82,7 @@ async fn build_status_handler(req: web::Json<BuildStatusRequest>) -> impl Respon
 }
 
 // Function to fetch and parse Garnix data
-async fn get_garnix_data(jwt_token: &str, commit_id: &str) -> Result<GarnixResponse, Box<dyn std::error.Error>> {
+async fn get_garnix_data(jwt_token: &str, commit_id: &str) -> Result<GarnixResponse, Box<dyn std::error::Error>> {
     let client = reqwest::Client::new(); // Create client inside function
     let url = format!("https://garnix.io/api/commits/{}", commit_id);
     let cookie = format!("__stripe_mid=119e351f-f0e8-4943-abae-6e207d8b6aac548adf; JWT-Cookie={}; NO-XSRF-TOKEN=", jwt_token);
@@ -108,12 +108,12 @@ async fn get_garnix_data(jwt_token: &str, commit_id: &str) -> Result<GarnixRespo
     Ok(response)
 }
 
-fn main() -> Result<(), Box<dyn std::error.Error>> { // main is now synchronous
+fn main() -> Result<(), Box<dyn std::error::Error>> { // main is now synchronous
     let args: Vec<String> = env::args().collect();
 
     // Check if running as server
     if args.len() == 2 && args[1] == "--server" {
-        return tokio::runtime::Runtime::new().unwrap().block_on(async -> Result<(), Box<dyn std::error.Error>> { // Explicitly define return type
+        return tokio::runtime::Runtime::new().unwrap().block_on(async -> Result<(), Box<dyn std::error::Error>> { // Explicitly define return type
             HttpServer::new(|| {
                 App::new().service(build_status_handler)
             })
