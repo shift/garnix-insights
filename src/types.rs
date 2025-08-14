@@ -183,11 +183,11 @@ impl Build {
     /// Get a human-readable status with emoji
     pub fn status_with_emoji(&self) -> String {
         let emoji = match self.status_enum() {
-            BuildStatus::Success => "✅",
-            BuildStatus::Failed => "❌",
+            BuildStatus::Success => "[OK]",
+            BuildStatus::Failed => "[FAIL]",
             BuildStatus::Pending => "⏳",
-            BuildStatus::Cancelled => "🚫",
-            BuildStatus::Other(_) => "❓",
+            BuildStatus::Cancelled => "[CANCELLED]",
+            BuildStatus::Other(_) => "[UNKNOWN]",
         };
         format!("{} {}", emoji, self.status)
     }
@@ -285,7 +285,7 @@ mod tests {
         assert!(successful_build.is_successful());
         assert!(!successful_build.is_failed());
         assert!(!successful_build.is_pending());
-        assert_eq!(successful_build.status_with_emoji(), "✅ Success");
+        assert_eq!(successful_build.status_with_emoji(), "[OK] Success");
     }
 
     #[test]

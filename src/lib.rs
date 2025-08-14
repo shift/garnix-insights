@@ -115,10 +115,10 @@ pub fn format_build_summary(response: &GarnixResponse) -> String {
          **Branch:** {}\n\
          **Started:** {}\n\n\
          ## Summary\n\
-         - ✅ Succeeded: {}\n\
-         - ❌ Failed: {}\n\
+         - [OK] Succeeded: {}\n\
+         - [FAIL] Failed: {}\n\
          - ⏳ Pending: {}\n\
-         - 🚫 Cancelled: {}",
+         - [CANCELLED] Cancelled: {}",
         &response.summary.git_commit[..std::cmp::min(8, response.summary.git_commit.len())],
         response.summary.repo_owner,
         response.summary.repo_name,
@@ -293,8 +293,8 @@ mod tests {
         assert!(formatted.contains("# Build Summary for abc123de"));
         assert!(formatted.contains("testowner/testrepo"));
         assert!(formatted.contains("**Branch:** main"));
-        assert!(formatted.contains("✅ Succeeded: 5"));
-        assert!(formatted.contains("❌ Failed: 1"));
+        assert!(formatted.contains("[OK] Succeeded: 5"));
+        assert!(formatted.contains("[FAIL] Failed: 1"));
     }
 
     #[test]
@@ -304,9 +304,9 @@ mod tests {
 
         assert!(formatted.contains("## Individual Builds"));
         assert!(formatted.contains("### package1"));
-        assert!(formatted.contains("✅ Success"));
+        assert!(formatted.contains("[OK] Success"));
         assert!(formatted.contains("### package2"));
-        assert!(formatted.contains("❌ Failed"));
+        assert!(formatted.contains("[FAIL] Failed"));
         assert!(formatted.contains("**System:** x86_64-linux"));
     }
 

@@ -192,7 +192,7 @@ impl Cli {
                         println!(r#"{{"valid": true, "message": "Token is valid"}}"#);
                     }
                     _ => {
-                        println!("✅ JWT token is valid");
+                        println!("[OK] JWT token is valid");
                     }
                 }
                 Ok(())
@@ -203,7 +203,7 @@ impl Cli {
                         println!(r#"{{"valid": false, "error": "{}"}}"#, e);
                     }
                     _ => {
-                        println!("❌ JWT token is invalid: {}", e);
+                        println!("[FAIL] JWT token is invalid: {}", e);
                     }
                 }
                 Err(e)
@@ -254,7 +254,7 @@ impl Cli {
 
         // Print individual builds if there are any failures
         if response.summary.failed > 0 {
-            println!("\n🔍 Failed Builds:");
+            println!("\n[SEARCH] Failed Builds:");
             for build in response.failed_builds() {
                 println!(
                     "  • {} ({}): {}",
@@ -271,11 +271,11 @@ impl Cli {
         // Print success rate
         let success_rate = response.success_rate();
         let emoji = if success_rate == 100.0 {
-            "🎉"
+            "[SUCCESS]"
         } else if success_rate >= 80.0 {
-            "👍"
+            "[GOOD]"
         } else {
-            "⚠️"
+            "[WARNING]"
         };
         println!("\n{} Success Rate: {:.1}%", emoji, success_rate);
     }
