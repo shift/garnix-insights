@@ -159,7 +159,9 @@
             cargo-license
             cargo-nextest
             nil  # Nix LSP
-          ]; 
+            git-filter-repo  # For rewriting git history
+            python3  # Required by git-filter-repo
+            gh  # GitHub CLI for releases 
 
           shellHook = ''
             echo "🚀 Garnix Insights Development Environment"
