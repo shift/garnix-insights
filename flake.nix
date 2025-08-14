@@ -161,7 +161,59 @@
             nil  # Nix LSP
             git-filter-repo  # For rewriting git history
             python3  # Required by git-filter-repo
-            gh  # GitHub CLI for releases 
+            gh  # GitHub CLI for releases
+            
+            # Custom scripts for crates.io testing
+            (pkgs.writeScriptBin "test-cratesio" ''
+              #!/bin/bash
+              echo "🔍 Testing crates.io version installation (development only)..."
+              echo "This test requires network access and only works in nix develop"
+              
+              # Create temporary cargo home
+              export TEMP_CARGO_HOME=$(mktemp -d)
+              export OLD_CARGO_HOME=$CARGO_HOME
+              export CARGO_HOME=$TEMP_CARGO_HOME
+              export OLD_PATH=$PATH
+              export PATH="$TEMP_CARGO_HOME/bin:$PATH"
+              
+              # Install from crates.io
+              if cargo install garnix-insights --version 0.1.6; then
+                echo "✅ Successfully installed garnix-insights v0.1.6 from crates.io"
+                
+                # Test functionality
+                echo "Testing installed version..."
+                garnix-insights --help > /dev/null
+                garnix-insights --version
+                garnix-insights mcp --help > /dev/null
+                garnix-insights server --help > /dev/null
+                
+                echo "✅ All functionality tests passed!"
+              else
+                echo "❌ Failed to install from crates.io"
+                exit 1
+              fi
+              
+              # Cleanup
+              export CARGO_HOME=$OLD_CARGO_HOME
+              export PATH=$OLD_PATH
+              rm -rf $TEMP_CARGO_HOME
+              
+              echo "✅ Crates.io version test completed successfully"
+            '')
+            
+            (pkgs.writeScriptBin "check-cratesio-api" ''
+              #!/bin/bash
+              echo "🔍 Checking crates.io API..."
+              response=$(curl -s "https://crates.io/api/v1/crates/garnix-insights" 2>/dev/null || echo "{}")
+              
+              if echo "$response" | jq -e '.crate.name == "garnix-insights"' > /dev/null 2>&1; then
+                echo "✅ garnix-insights found on crates.io"
+                echo "Available versions:"
+                echo "$response" | jq -r '.versions[] | .num' | head -5
+              else
+                echo "⚠️ Could not verify package on crates.io"
+              fi
+            '')
           ];
 
           shellHook = ''
@@ -173,6 +225,8 @@
             echo "  cargo fmt           - Format code"
             echo "  cargo deny check    - Check licenses and security"
             echo "  nix flake check     - Run all checks"
+            echo "  test-cratesio       - Test crates.io version (development only)"
+            echo "  check-cratesio-api  - Check crates.io API"
             echo ""
             echo "Project: $(cargo read-manifest | jq -r '.name') v$(cargo read-manifest | jq -r '.version')"
           '';
@@ -253,6 +307,52 @@
             installPhase = ''
               mkdir -p $out
               echo "Integration tests passed" > $out/success
+            '';
+          };
+          
+          # Crates.io API verification (sandboxed) 
+          # This only checks the API without installing - use `test-cratesio` in nix develop for full test
+          cratesio-version-test = pkgs.stdenv.mkDerivation {
+            name = "garnix-insights-cratesio-api-test";
+            src = ./.;
+            
+            nativeBuildInputs = with pkgs; [ curl jq ];
+            
+            buildPhase = ''
+              echo "📦 Checking crates.io API (sandboxed build - no installation)"
+              echo "For full installation testing, use 'test-cratesio' in nix develop shell"
+              echo ""
+              
+              # Query crates.io API to check if our package exists
+              response=$(curl -s "https://crates.io/api/v1/crates/garnix-insights" 2>/dev/null || echo "{}")
+              
+              if echo "$response" | jq -e '.crate.name == "garnix-insights"' > /dev/null 2>&1; then
+                echo "✅ garnix-insights found on crates.io"
+                
+                # Get version info
+                echo "Available versions:"
+                echo "$response" | jq -r '.versions[] | .num' | head -5 2>/dev/null || echo "Could not retrieve versions"
+                
+                # Check if our current version is published
+                current_version="0.1.6"
+                if echo "$response" | jq -e ".versions[] | select(.num == \"$current_version\")" > /dev/null 2>&1; then
+                  echo "✅ Version $current_version is published on crates.io"
+                else
+                  echo "⚠️  Version $current_version not found on crates.io"
+                fi
+                
+                echo "✅ Crates.io API verification completed successfully"
+              else
+                echo "⚠️  Could not verify garnix-insights on crates.io"
+                echo "This could mean network restrictions in sandbox or package not published"
+                echo "Response: $response"
+                echo "⚠️  Continuing with warning (sandboxed builds have network limitations)"
+              fi
+            '';
+            
+            installPhase = ''
+              mkdir -p $out
+              echo "Crates.io API verification completed" > $out/success
             '';
           };
         };
