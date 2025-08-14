@@ -147,6 +147,25 @@
         #     echo "All cargo-deny checks passed" > $out/success
         #   '';
         # };
+
+        # Code coverage report (development only - requires network)
+        coverageReport = pkgs.stdenv.mkDerivation {
+          name = "garnix-insights-coverage";
+          inherit src;
+          
+          nativeBuildInputs = [ rustToolchain pkgs.cargo-tarpaulin ];
+          
+          buildPhase = ''
+            export CARGO_HOME=$(mktemp -d)
+            cargo tarpaulin --out Html --output-dir coverage --timeout 120
+          '';
+          
+          installPhase = ''
+            mkdir -p $out
+            cp -r coverage $out/
+            echo "Coverage report generated at $out/coverage/" > $out/info
+          '';
+        };
       in 
       { 
         # Development environment
@@ -158,6 +177,7 @@
             cargo-audit
             cargo-license
             cargo-nextest
+            cargo-tarpaulin  # Code coverage
             nil  # Nix LSP
             git-filter-repo  # For rewriting git history
             python3  # Required by git-filter-repo

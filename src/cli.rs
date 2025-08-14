@@ -1,4 +1,4 @@
-//! Command-line interface for Garnix Fetcher
+//! Command-line interface for Garnix Insights
 
 use crate::client::GarnixClient;
 use crate::error::{GarnixError, GarnixResult};
@@ -7,9 +7,9 @@ use crate::server::GarnixHttpServer;
 use clap::{Parser, Subcommand};
 use tracing::{error, info};
 
-/// Garnix Fetcher - Fetch CI build status from Garnix.io
+/// Garnix Insights - Fetch CI build status from Garnix.io
 #[derive(Parser, Debug)]
-#[command(name = "garnix-fetcher")]
+#[command(name = "garnix-insights")]
 #[command(about = "Fetch CI build status from Garnix.io")]
 #[command(version)]
 pub struct Cli {
@@ -102,7 +102,7 @@ impl Cli {
 
         tracing_subscriber::fmt().with_max_level(level).init();
 
-        info!("Starting Garnix Fetcher v{}", env!("CARGO_PKG_VERSION"));
+        info!("Starting Garnix Insights v{}", env!("CARGO_PKG_VERSION"));
 
         let client = GarnixClient::new();
 
@@ -325,7 +325,7 @@ mod tests {
                 repo_owner: "testuser".to_string(),
                 repo_name: "testrepo".to_string(),
                 repo_is_public: true,
-                git_commit: "abc123".to_string(),
+                git_commit: "7a2f5e9c1b4d8a3e6f2a9e5c8b1d4f7a3c6e9b2d".to_string(),
                 branch: "main".to_string(),
                 req_user: "testuser".to_string(),
                 start_time: "2024-01-01T00:00:00Z".to_string(),
@@ -341,7 +341,7 @@ mod tests {
                     repo_name: "testrepo".to_string(),
                     branch: "main".to_string(),
                     repo_is_public: true,
-                    git_commit: "abc123".to_string(),
+                    git_commit: "7a2f5e9c1b4d8a3e6f2a9e5c8b1d4f7a3c6e9b2d".to_string(),
                     package: "package1".to_string(),
                     package_type: "derivation".to_string(),
                     system: Some("x86_64-linux".to_string()),
@@ -362,7 +362,7 @@ mod tests {
                     repo_name: "testrepo".to_string(),
                     branch: "main".to_string(),
                     repo_is_public: true,
-                    git_commit: "abc123".to_string(),
+                    git_commit: "7a2f5e9c1b4d8a3e6f2a9e5c8b1d4f7a3c6e9b2d".to_string(),
                     package: "package2".to_string(),
                     package_type: "derivation".to_string(),
                     system: Some("x86_64-linux".to_string()),
@@ -385,12 +385,12 @@ mod tests {
     #[test]
     fn test_cli_parsing() {
         let cli = Cli::try_parse_from(&[
-            "garnix-fetcher",
+            "garnix-insights",
             "fetch",
             "--jwt-token",
             "test-token",
             "--commit-id",
-            "abc123",
+            "5d9e2f7a1c4b8e3a6f1d9e2a7f5c8b3e6a1f4d9e",
         ])
         .unwrap();
 
@@ -400,7 +400,7 @@ mod tests {
                 commit_id,
             } => {
                 assert_eq!(jwt_token.unwrap(), "test-token");
-                assert_eq!(commit_id, "abc123");
+                assert_eq!(commit_id, "5d9e2f7a1c4b8e3a6f1d9e2a7f5c8b3e6a1f4d9e");
             }
             _ => panic!("Wrong command parsed"),
         }
@@ -409,7 +409,7 @@ mod tests {
     #[test]
     fn test_cli_server_parsing() {
         let cli = Cli::try_parse_from(&[
-            "garnix-fetcher",
+            "garnix-insights",
             "server",
             "--bind-address",
             "0.0.0.0",
@@ -429,7 +429,7 @@ mod tests {
 
     #[test]
     fn test_cli_mcp_parsing() {
-        let cli = Cli::try_parse_from(&["garnix-fetcher", "mcp"]).unwrap();
+        let cli = Cli::try_parse_from(&["garnix-insights", "mcp"]).unwrap();
 
         assert!(matches!(cli.command.unwrap(), Commands::Mcp));
     }
@@ -437,7 +437,7 @@ mod tests {
     #[test]
     fn test_cli_validate_token_parsing() {
         let cli = Cli::try_parse_from(&[
-            "garnix-fetcher",
+            "garnix-insights",
             "validate-token",
             "--jwt-token",
             "test-token",
@@ -455,7 +455,7 @@ mod tests {
     #[test]
     fn test_cli_logs_parsing() {
         let cli = Cli::try_parse_from(&[
-            "garnix-fetcher",
+            "garnix-insights",
             "logs",
             "--jwt-token",
             "test-token",
@@ -479,14 +479,14 @@ mod tests {
     #[test]
     fn test_output_format_parsing() {
         let cli = Cli::try_parse_from(&[
-            "garnix-fetcher",
+            "garnix-insights",
             "--format",
             "json",
             "fetch",
             "--jwt-token",
             "test",
             "--commit-id",
-            "abc123",
+            "6e1f5a8c3d9b2e7a4f8c1e6a9d5b2f7a4c8e1b6d",
         ])
         .unwrap();
 
@@ -495,14 +495,14 @@ mod tests {
 
     #[test]
     fn test_verbose_flag() {
-        let cli = Cli::try_parse_from(&["garnix-fetcher", "--verbose", "mcp"]).unwrap();
+        let cli = Cli::try_parse_from(&["garnix-insights", "--verbose", "mcp"]).unwrap();
 
         assert!(cli.verbose);
     }
 
     #[test]
     fn test_print_human_readable() {
-        let cli = Cli::try_parse_from(&["garnix-fetcher", "mcp"]).unwrap();
+        let cli = Cli::try_parse_from(&["garnix-insights", "mcp"]).unwrap();
         let response = create_test_response();
 
         // This test mainly ensures the method doesn't panic
@@ -512,10 +512,70 @@ mod tests {
 
     #[test]
     fn test_print_plain_text() {
-        let cli = Cli::try_parse_from(&["garnix-fetcher", "mcp"]).unwrap();
+        let cli = Cli::try_parse_from(&["garnix-insights", "mcp"]).unwrap();
         let response = create_test_response();
 
         // This test mainly ensures the method doesn't panic
         cli.print_plain_text(&response);
+    }
+
+    #[test]
+    fn test_json_format_serialization() {
+        let response = create_test_response();
+
+        // Test that the response can be serialised to JSON without error
+        let json_result = serde_json::to_string_pretty(&response);
+        assert!(json_result.is_ok());
+        
+        let json_string = json_result.unwrap();
+        assert!(json_string.contains("7a2f5e9c1b4d8a3e6f2a9e5c8b1d4f7a3c6e9b2d")); // commit ID
+        assert!(json_string.contains("testuser")); // repo owner
+    }
+
+    #[test]
+    fn test_cli_structure() {
+        let cli = Cli {
+            jwt_token: Some("token".to_string()),
+            commit_id: Some("8b3e6f1a4c9d2e7a5f8b1e4a7c2f5e9a6b3d8f1a".to_string()),
+            verbose: true,
+            format: OutputFormat::Json,
+            command: Some(Commands::Mcp),
+        };
+        
+        assert!(cli.verbose);
+        assert!(matches!(cli.format, OutputFormat::Json));
+        assert_eq!(cli.jwt_token, Some("token".to_string()));
+        assert_eq!(cli.commit_id, Some("8b3e6f1a4c9d2e7a5f8b1e4a7c2f5e9a6b3d8f1a".to_string()));
+    }
+
+    #[tokio::test]
+    async fn test_cli_error_handling() {
+        let cli = Cli {
+            jwt_token: None,
+            commit_id: Some("test123".to_string()),
+            verbose: false,
+            format: OutputFormat::Human,
+            command: Some(Commands::Fetch {
+                jwt_token: None,
+                commit_id: "test123".to_string(),
+            }),
+        };
+
+        // This should fail due to missing JWT token
+        let result = cli.run().await;
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_output_format_variants() {
+        // Test that all variants can be created
+        let _human = OutputFormat::Human;
+        let _json = OutputFormat::Json;
+        let _plain = OutputFormat::Plain;
+        
+        // Test Debug trait
+        assert!(!format!("{:?}", OutputFormat::Human).is_empty());
+        assert!(!format!("{:?}", OutputFormat::Json).is_empty());
+        assert!(!format!("{:?}", OutputFormat::Plain).is_empty());
     }
 }

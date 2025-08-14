@@ -294,7 +294,7 @@ mod tests {
                 "repo_owner": "testuser",
                 "repo_name": "testrepo",
                 "repo_is_public": true,
-                "git_commit": "abc123",
+                "git_commit": "3b8e1f2a9c5d7e4a6b2f9e7c1a4d8f3a5c2e9b7d",
                 "branch": "main",
                 "req_user": "testuser",
                 "start_time": "2024-01-01T00:00:00Z",
@@ -308,7 +308,7 @@ mod tests {
         });
 
         let _mock = server
-            .mock("GET", "/builds/abc123")
+            .mock("GET", "/builds/3b8e1f2a9c5d7e4a6b2f9e7c1a4d8f3a5c2e9b7d")
             .match_header("authorization", "Bearer test-token")
             .with_status(200)
             .with_header("content-type", "application/json")
@@ -316,11 +316,11 @@ mod tests {
             .create_async()
             .await;
 
-        let result = client.fetch_build_status("test-token", "abc123").await;
+        let result = client.fetch_build_status("test-token", "3b8e1f2a9c5d7e4a6b2f9e7c1a4d8f3a5c2e9b7d").await;
         assert!(result.is_ok());
 
         let response = result.unwrap();
-        assert_eq!(response.summary.git_commit, "abc123");
+        assert_eq!(response.summary.git_commit, "3b8e1f2a9c5d7e4a6b2f9e7c1a4d8f3a5c2e9b7d");
         assert_eq!(response.builds.len(), 1);
     }
 
@@ -330,13 +330,13 @@ mod tests {
         let client = GarnixClient::with_base_url(server.url());
 
         let _mock = server
-            .mock("GET", "/builds/abc123")
+            .mock("GET", "/builds/4c9f2e7b1a5d8e3a6b1f4e9c2a7d5f8a3c6e1b9f")
             .match_header("authorization", "Bearer invalid-token")
             .with_status(401)
             .create_async()
             .await;
 
-        let result = client.fetch_build_status("invalid-token", "abc123").await;
+        let result = client.fetch_build_status("invalid-token", "4c9f2e7b1a5d8e3a6b1f4e9c2a7d5f8a3c6e1b9f").await;
         assert!(matches!(result, Err(GarnixError::AuthenticationError(_))));
     }
 

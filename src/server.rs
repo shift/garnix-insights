@@ -92,7 +92,7 @@ async fn health_check() -> ActixResult<HttpResponse> {
     info!("Health check requested");
     Ok(HttpResponse::Ok().json(json!({
         "status": "healthy",
-        "service": "garnix-fetcher",
+        "service": "garnix-insights",
         "version": env!("CARGO_PKG_VERSION"),
         "timestamp": chrono::Utc::now().to_rfc3339()
     })))
@@ -360,7 +360,7 @@ mod tests {
 
         let body: serde_json::Value = test::read_body_json(resp).await;
         assert_eq!(body["status"], "healthy");
-        assert_eq!(body["service"], "garnix-fetcher");
+        assert_eq!(body["service"], "garnix-insights");
     }
 
     #[actix_web::test]
@@ -416,7 +416,7 @@ mod tests {
             .uri("/build-status")
             .set_json(json!({
                 "jwt_token": "",
-                "commit_id": "abc123"
+                "commit_id": "7f1a9b3c5e2d8f4a6c1b9e8d3f7a2c6b9e4d8f1a"
             }))
             .to_request();
 
@@ -466,7 +466,7 @@ mod tests {
             .uri("/build-status")
             .set_json(json!({
                 "jwt_token": "test-token",
-                "commit_id": "invalid-commit"
+                "commit_id": "invalid-commit-format-test"
             }))
             .to_request();
 
@@ -487,7 +487,7 @@ mod tests {
         .await;
 
         let req = test::TestRequest::get()
-            .uri("/build-status/abc123456789")
+            .uri("/build-status/2a7f8b9c1e4d6f3a5c9b2e7d8f1a4c6b9e2d7f8a")
             .to_request();
 
         let resp = test::call_service(&app, req).await;

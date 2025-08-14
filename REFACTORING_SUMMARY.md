@@ -87,7 +87,7 @@
 - `logs` - Get build logs for specific builds
 
 ### Output Formats
-- **Human**: Colorful, emoji-rich output with formatting
+- **Human**: Colourful, emoji-rich output with formatting
 - **JSON**: Machine-readable structured output
 - **Plain**: Simple text output for scripting
 
