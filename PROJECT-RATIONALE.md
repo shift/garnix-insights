@@ -26,7 +26,7 @@ GitHub Actions and CI systems have a fundamental limitation when it comes to Gar
 
 ### Programmatic Access to Build Intelligence
 
-Garnix Insights bridges the gap by providing **three complementary interfaces** for accessing Garnix.io build data:
+Garnix Insights bridges the gap by providing **three different interfaces** for accessing Garnix.io build data:
 
 1. **CLI Tool**: Direct command-line access for scripts and manual queries
 2. **HTTP Server**: RESTful API for web applications and services
@@ -48,9 +48,9 @@ After: *Agent automatically queries build status and responds with complete anal
 ```bash
 # Script can programmatically decide if deployment is safe
 if garnix-insights fetch --commit-id $COMMIT --format json | jq '.success_rate == 100'; then
-  echo "✅ All builds passed - safe to deploy"
+  echo "All builds passed - safe to deploy"
 else
-  echo "❌ Builds failed - blocking deployment"
+  echo "Builds failed - blocking deployment"
 fi
 ```
 
@@ -110,7 +110,7 @@ agent.query_build_status("abc123")
 
 ### Built for Reliability
 
-- **Comprehensive error handling**: Clear error messages for authentication, network, and API issues
+- **Good error handling**: Clear error messages for authentication, network, and API issues
 - **Multiple output formats**: Choose the right format for each use case
 - **Robust authentication**: JWT token support with environment variable fallback
 - **Extensive logging**: Debug mode provides detailed request/response information
@@ -118,18 +118,18 @@ agent.query_build_status("abc123")
 ## Impact and Benefits
 
 ### Before Garnix Insights
-- Manual copy-paste workflows ❌
-- No programmatic access to build data ❌
-- GitHub Actions can't check Garnix status ❌
-- Agents can't access build information ❌
-- Deployment decisions require manual verification ❌
+- Manual copy-paste workflows 
+- No programmatic access to build data 
+- GitHub Actions can't check Garnix status 
+- Agents can't access build information 
+- Deployment decisions require manual verification 
 
 ### After Garnix Insights
-- Fully automated build status queries ✅
-- Rich programmatic API access ✅
-- GitHub Actions integration possible ✅
-- Native AI agent support ✅
-- Automated deployment gating ✅
+- Fully automated build status queries 
+- Rich programmatic API access 
+- GitHub Actions integration possible 
+- Native AI agent support 
+- Automated deployment gating
 
 ### Real-World Workflow Transformation
 
@@ -153,6 +153,6 @@ garnix-insights fetch --commit-id $(git rev-parse HEAD) --format human
 
 This isn't just about convenience—it's about **removing friction from the development workflow**. When tools integrate seamlessly, developers can focus on building instead of wrestling with manual processes.
 
-Garnix Insights transforms Garnix.io from a web-only service into a **first-class API citizen** that can participate in modern DevOps workflows, AI agent interactions, and automated decision-making processes.
+Garnix Insights transforms Garnix.io from a web-only service into a **proper API** that can participate in modern DevOps workflows, AI agent interactions, and automated decision-making processes.
 
 The result? **Less manual work, better decisions, and more reliable deployments.**
