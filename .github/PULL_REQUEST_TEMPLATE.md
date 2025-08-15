@@ -6,13 +6,13 @@
 
 <!-- Mark with an x all that apply -->
 
-- [ ] 🐛 Bug fix (non-breaking change which fixes an issue)
-- [ ] ✨ New feature (non-breaking change which adds functionality)
-- [ ] 💥 Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] 📖 Documentation update
-- [ ] 🔧 Maintenance (dependency updates, CI improvements, etc.)
-- [ ] ♻️ Refactor (code change that neither fixes a bug nor adds a feature)
-- [ ] ✅ Tests (adding missing tests or correcting existing tests)
+- [ ] [BUG] Bug fix (non-breaking change which fixes an issue)
+- [ ] [FEATURE] New feature (non-breaking change which adds functionality)
+- [ ] [BREAKING] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- [ ] [DOCUMENTATION] Documentation update
+- [ ] [MAINTENANCE] Maintenance (dependency updates, CI improvements, etc.)
+- [ ] [REFACTOR] Refactor (code change that neither fixes a bug nor adds a feature)
+- [ ] [OK] Tests (adding missing tests or correcting existing tests)
 
 ## Related Issues
 
