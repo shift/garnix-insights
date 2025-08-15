@@ -71,7 +71,7 @@ Built three interfaces because different situations need different approaches:
 
 1. **CLI**: For quick checks and scripts
 2. **HTTP Server**: For web apps and services  
-3. **MCP Server**: For AI agents (when it's finished)
+3. **MCP Server**: For AI agents (fully working)
 
 ### What You Can Actually Do
 
