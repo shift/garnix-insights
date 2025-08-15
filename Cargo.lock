@@ -836,6 +836,7 @@ dependencies = [
  "actix-web",
  "anyhow",
  "assert_matches",
+ "async-trait",
  "chrono",
  "clap",
  "mockito",
