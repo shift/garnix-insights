@@ -36,7 +36,7 @@ impl GarnixMcpServer {
     /// Run the MCP server on stdio transport
     pub async fn run_stdio(self) -> GarnixResult<()> {
         tracing::info!("Starting Garnix Insights MCP server on stdio transport");
-        
+
         let stdin = tokio::io::stdin();
         let mut stdout = tokio::io::stdout();
         let mut reader = BufReader::new(stdin);
@@ -59,10 +59,14 @@ impl GarnixMcpServer {
                 }
             }
         });
-        
-        stdout.write_all(format!("{}\n", server_info).as_bytes()).await
+
+        stdout
+            .write_all(format!("{}\n", server_info).as_bytes())
+            .await
             .map_err(|e| GarnixError::NetworkError(format!("Failed to write to stdout: {}", e)))?;
-        stdout.flush().await
+        stdout
+            .flush()
+            .await
             .map_err(|e| GarnixError::NetworkError(format!("Failed to flush stdout: {}", e)))?;
 
         loop {
@@ -73,14 +77,22 @@ impl GarnixMcpServer {
                     break;
                 }
                 Ok(_) => {
-                    if let Ok(request) = serde_json::from_str::<McpRequest>(&line.trim()) {
+                    if let Ok(request) = serde_json::from_str::<McpRequest>(line.trim()) {
                         let response = self.handle_request(request).await;
                         let response_json = serde_json::to_string(&response).unwrap_or_default();
-                        
-                        stdout.write_all(format!("{}\n", response_json).as_bytes()).await
-                            .map_err(|e| GarnixError::NetworkError(format!("Failed to write response: {}", e)))?;
-                        stdout.flush().await
-                            .map_err(|e| GarnixError::NetworkError(format!("Failed to flush stdout: {}", e)))?;
+
+                        stdout
+                            .write_all(format!("{}\n", response_json).as_bytes())
+                            .await
+                            .map_err(|e| {
+                                GarnixError::NetworkError(format!(
+                                    "Failed to write response: {}",
+                                    e
+                                ))
+                            })?;
+                        stdout.flush().await.map_err(|e| {
+                            GarnixError::NetworkError(format!("Failed to flush stdout: {}", e))
+                        })?;
                     } else {
                         tracing::warn!("Invalid JSON-RPC request: {}", line.trim());
                     }
@@ -222,7 +234,8 @@ impl GarnixMcpServer {
 
     async fn handle_tool_call(&self, params: Option<Value>) -> Result<Value, String> {
         let params = params.ok_or("Missing parameters for tool call")?;
-        let tool_name = params.get("name")
+        let tool_name = params
+            .get("name")
             .and_then(|v| v.as_str())
             .ok_or("Missing tool name")?;
         let arguments = params.get("arguments").cloned().unwrap_or(json!({}));
@@ -236,11 +249,13 @@ impl GarnixMcpServer {
     }
 
     async fn handle_get_build_status(&self, arguments: Value) -> Result<Value, String> {
-        let commit_id = arguments.get("commit_id")
+        let commit_id = arguments
+            .get("commit_id")
             .and_then(|v| v.as_str())
             .ok_or("Missing required argument: commit_id")?;
-        
-        let token = arguments.get("token")
+
+        let token = arguments
+            .get("token")
             .and_then(|v| v.as_str())
             .ok_or("Missing required argument: token")?;
 
@@ -251,7 +266,7 @@ impl GarnixMcpServer {
                 Ok(json!({
                     "content": [{
                         "type": "text",
-                        "text": format!("Build Status for commit {}:\n\n{}", commit_id, 
+                        "text": format!("Build Status for commit {}:\n\n{}", commit_id,
                             serde_json::to_string_pretty(&status_json).unwrap_or_default())
                     }]
                 }))
@@ -261,11 +276,13 @@ impl GarnixMcpServer {
     }
 
     async fn handle_get_build_logs(&self, arguments: Value) -> Result<Value, String> {
-        let commit_id = arguments.get("commit_id")
+        let commit_id = arguments
+            .get("commit_id")
             .and_then(|v| v.as_str())
             .ok_or("Missing required argument: commit_id")?;
-        
-        let token = arguments.get("token")
+
+        let token = arguments
+            .get("token")
             .and_then(|v| v.as_str())
             .ok_or("Missing required argument: token")?;
 
@@ -300,11 +317,13 @@ impl GarnixMcpServer {
     }
 
     async fn handle_check_commit_ready(&self, arguments: Value) -> Result<Value, String> {
-        let commit_id = arguments.get("commit_id")
+        let commit_id = arguments
+            .get("commit_id")
             .and_then(|v| v.as_str())
             .ok_or("Missing required argument: commit_id")?;
-        
-        let token = arguments.get("token")
+
+        let token = arguments
+            .get("token")
             .and_then(|v| v.as_str())
             .ok_or("Missing required argument: token")?;
 
@@ -313,7 +332,7 @@ impl GarnixMcpServer {
                 let total_builds = status.builds.len() as u32;
                 let success_rate = status.success_rate();
                 let is_ready = success_rate == 100.0 && total_builds > 0;
-                
+
                 let status_text = if is_ready {
                     format!(
                         "[OK] Commit {} is ready for deployment! All {} builds passed.",
@@ -330,7 +349,7 @@ impl GarnixMcpServer {
 
                 Ok(json!({
                     "content": [{
-                        "type": "text", 
+                        "type": "text",
                         "text": status_text
                     }]
                 }))
@@ -399,7 +418,7 @@ mod tests {
         let json = r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}"#;
         let request: Result<McpRequest, _> = serde_json::from_str(json);
         assert!(request.is_ok());
-        
+
         let req = request.unwrap();
         assert_eq!(req.method, "initialize");
         assert_eq!(req.jsonrpc, "2.0");
