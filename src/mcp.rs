@@ -50,7 +50,7 @@ impl GarnixMcpServer {
                 "protocolVersion": "1.0",
                 "serverInfo": {
                     "name": "garnix-insights",
-                    "version": "0.1.6"
+                    "version": "0.2.0"
                 },
                 "capabilities": {
                     "tools": {
@@ -106,7 +106,7 @@ impl GarnixMcpServer {
                         "protocolVersion": "1.0",
                         "serverInfo": {
                             "name": "garnix-insights",
-                            "version": "0.1.6"
+                            "version": "0.2.0"
                         },
                         "capabilities": {
                             "tools": {
