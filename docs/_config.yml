@@ -1,0 +1,12 @@
+title: Garnix Fetcher Docs
+theme: jekyll-theme-cayman
+markdown: kramdown
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
+include:
+  - README.md
+  - ai-agent-instructions.md
+  - MCP-CONFIGURATION.md
