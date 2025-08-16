@@ -6,7 +6,10 @@ plugins:
 relative_links:
   enabled: true
   collections: true
+url: https://shift.github.io
+baseurl: /garnix-insights
 include:
   - README.md
   - ai-agent-instructions.md
   - MCP-CONFIGURATION.md
+  - mcp-usage.md
