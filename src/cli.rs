@@ -541,14 +541,14 @@ mod tests {
 
     #[test]
     fn test_cli_structure() {
-         let cli = Cli {
-             jwt_token: Some("token".to_string()),
-             commit_id: Some("8b3e6f1a4c9d2e7a5f8b1e4a7c2f5e9a6b3d8f1a".to_string()),
-             verbose: true,
-             format: OutputFormat::Json,
-             mcp_version: None,
-             command: Some(Commands::Mcp),
-         };
+        let cli = Cli {
+            jwt_token: Some("token".to_string()),
+            commit_id: Some("8b3e6f1a4c9d2e7a5f8b1e4a7c2f5e9a6b3d8f1a".to_string()),
+            verbose: true,
+            format: OutputFormat::Json,
+            mcp_version: None,
+            command: Some(Commands::Mcp),
+        };
 
         assert!(cli.verbose);
         assert!(matches!(cli.format, OutputFormat::Json));
@@ -561,17 +561,17 @@ mod tests {
 
     #[tokio::test]
     async fn test_cli_error_handling() {
-         let cli = Cli {
-             jwt_token: None,
-             commit_id: Some("test123".to_string()),
-             verbose: false,
-             format: OutputFormat::Human,
-             mcp_version: None,
-             command: Some(Commands::Fetch {
-                 jwt_token: None,
-                 commit_id: "test123".to_string(),
-             }),
-         };
+        let cli = Cli {
+            jwt_token: None,
+            commit_id: Some("test123".to_string()),
+            verbose: false,
+            format: OutputFormat::Human,
+            mcp_version: None,
+            command: Some(Commands::Fetch {
+                jwt_token: None,
+                commit_id: "test123".to_string(),
+            }),
+        };
 
         // This should fail due to missing JWT token
         let result = cli.run().await;
