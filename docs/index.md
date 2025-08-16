@@ -2,10 +2,10 @@
 
 Welcome to the documentation and usage site for the Garnix fetcher/insights tools.
 
-- Project README: {{ site.baseurl }}/README/
-- AI agent instructions: {{ site.baseurl }}/ai-agent-instructions/
-- MCP configuration: {{ site.baseurl }}/MCP-CONFIGURATION/
-- MCP Usage: {{ site.baseurl }}/mcp-usage/
+- [Project README]({{ site.baseurl }}/README/)
+- [AI agent instructions]({{ site.baseurl }}/ai-agent-instructions/)
+- [MCP configuration]({{ site.baseurl }}/MCP-CONFIGURATION/)
+- [MCP Usage]({{ site.baseurl }}/mcp-usage/)
 
 ## Overview
 
