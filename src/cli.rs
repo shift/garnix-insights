@@ -2,7 +2,7 @@
 
 use crate::client::GarnixClient;
 use crate::error::{GarnixError, GarnixResult};
-use crate::mcp::GarnixMcpServer;
+use crate::mcp::{negotiate_version, GarnixMcpServer};
 use crate::server::GarnixHttpServer;
 use clap::{Parser, Subcommand};
 use tracing::{error, info};
@@ -32,6 +32,10 @@ pub struct Cli {
     /// Output format for results
     #[arg(long, default_value = "human")]
     pub format: OutputFormat,
+
+    /// MCP protocol version: latest|stable|legacy|YYYY-MM-DD
+    #[arg(long, env = "GARNIX_MCP_PROTOCOL_VERSION")]
+    pub mcp_version: Option<String>,
 }
 
 /// Available output formats
@@ -127,7 +131,10 @@ impl Cli {
             }
             Some(Commands::Mcp) => {
                 info!("Starting MCP server");
-                let server = GarnixMcpServer::with_client(client);
+                let requested = self.mcp_version.as_deref();
+                let version = negotiate_version(requested);
+                info!("MCP protocol version: {}", version.as_str());
+                let server = GarnixMcpServer::with_client_and_version(client, version);
                 server.run_stdio().await
             }
             Some(Commands::ValidateToken { jwt_token }) => {
