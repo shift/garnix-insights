@@ -2,7 +2,7 @@
 
 use crate::client::GarnixClient;
 use crate::error::{GarnixError, GarnixResult};
-use crate::mcp::GarnixMcpServer;
+use crate::mcp::{negotiate_version, GarnixMcpServer};
 use crate::server::GarnixHttpServer;
 use clap::{Parser, Subcommand};
 use tracing::{error, info};
@@ -32,6 +32,10 @@ pub struct Cli {
     /// Output format for results
     #[arg(long, default_value = "human")]
     pub format: OutputFormat,
+
+    /// MCP protocol version: latest|stable|legacy|YYYY-MM-DD
+    #[arg(long, env = "GARNIX_MCP_PROTOCOL_VERSION")]
+    pub mcp_version: Option<String>,
 }
 
 /// Available output formats
@@ -127,7 +131,10 @@ impl Cli {
             }
             Some(Commands::Mcp) => {
                 info!("Starting MCP server");
-                let server = GarnixMcpServer::with_client(client);
+                let requested = self.mcp_version.as_deref();
+                let version = negotiate_version(requested);
+                info!("MCP protocol version: {}", version.as_str());
+                let server = GarnixMcpServer::with_client_and_version(client, version);
                 server.run_stdio().await
             }
             Some(Commands::ValidateToken { jwt_token }) => {
@@ -534,13 +541,14 @@ mod tests {
 
     #[test]
     fn test_cli_structure() {
-        let cli = Cli {
-            jwt_token: Some("token".to_string()),
-            commit_id: Some("8b3e6f1a4c9d2e7a5f8b1e4a7c2f5e9a6b3d8f1a".to_string()),
-            verbose: true,
-            format: OutputFormat::Json,
-            command: Some(Commands::Mcp),
-        };
+         let cli = Cli {
+             jwt_token: Some("token".to_string()),
+             commit_id: Some("8b3e6f1a4c9d2e7a5f8b1e4a7c2f5e9a6b3d8f1a".to_string()),
+             verbose: true,
+             format: OutputFormat::Json,
+             mcp_version: None,
+             command: Some(Commands::Mcp),
+         };
 
         assert!(cli.verbose);
         assert!(matches!(cli.format, OutputFormat::Json));
@@ -553,16 +561,17 @@ mod tests {
 
     #[tokio::test]
     async fn test_cli_error_handling() {
-        let cli = Cli {
-            jwt_token: None,
-            commit_id: Some("test123".to_string()),
-            verbose: false,
-            format: OutputFormat::Human,
-            command: Some(Commands::Fetch {
-                jwt_token: None,
-                commit_id: "test123".to_string(),
-            }),
-        };
+         let cli = Cli {
+             jwt_token: None,
+             commit_id: Some("test123".to_string()),
+             verbose: false,
+             format: OutputFormat::Human,
+             mcp_version: None,
+             command: Some(Commands::Fetch {
+                 jwt_token: None,
+                 commit_id: "test123".to_string(),
+             }),
+         };
 
         // This should fail due to missing JWT token
         let result = cli.run().await;

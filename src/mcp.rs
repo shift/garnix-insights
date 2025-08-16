@@ -9,9 +9,60 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 
+/// Negotiate a supported MCP protocol version from an optional selector
+pub fn negotiate_version(requested: Option<&str>) -> McpVersion {
+    if let Some(v) = requested.and_then(McpVersion::parse_selector) {
+        if McpVersion::SUPPORTED.contains(&v) {
+            return v;
+        }
+    }
+    // default to stable when not specified or unsupported
+    McpVersion::V2025_03_26
+}
+
 /// MCP server for Garnix Insights
 pub struct GarnixMcpServer {
     client: GarnixClient,
+    version: McpVersion,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Supported MCP protocol versions (aligned with OpenCode)
+pub enum McpVersion {
+    /// Legacy protocol version
+    V2024_11_05,
+    /// Stable protocol version
+    V2025_03_26,
+    /// Latest protocol version
+    V2025_06_18,
+}
+
+impl McpVersion {
+    /// Ordered list of supported versions (preferred first)
+    pub const SUPPORTED: &'static [McpVersion] = &[
+        McpVersion::V2025_06_18,
+        McpVersion::V2025_03_26,
+        McpVersion::V2024_11_05,
+    ];
+
+    /// Parse a version selector (aliases allowed)
+    pub fn parse_selector(s: &str) -> Option<Self> {
+        match s {
+            "latest" | "2025-06-18" => Some(Self::V2025_06_18),
+            "stable" | "2025-03-26" => Some(Self::V2025_03_26),
+            "legacy" | "2024-11-05" => Some(Self::V2024_11_05),
+            _ => None,
+        }
+    }
+
+    /// Return canonical date string for the version
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::V2025_06_18 => "2025-06-18",
+            Self::V2025_03_26 => "2025-03-26",
+            Self::V2024_11_05 => "2024-11-05",
+        }
+    }
 }
 
 impl Default for GarnixMcpServer {
@@ -25,12 +76,18 @@ impl GarnixMcpServer {
     pub fn new() -> Self {
         Self {
             client: GarnixClient::new(),
+            version: McpVersion::V2025_03_26,
         }
     }
 
     /// Create a new MCP server with custom Garnix client
     pub fn with_client(client: GarnixClient) -> Self {
-        Self { client }
+        Self { client, version: McpVersion::V2025_03_26 }
+    }
+
+    /// Create a new MCP server with custom client and version
+    pub fn with_client_and_version(client: GarnixClient, version: McpVersion) -> Self {
+        Self { client, version }
     }
 
     /// Run the MCP server on stdio transport
@@ -42,12 +99,12 @@ impl GarnixMcpServer {
         let mut reader = BufReader::new(stdin);
         let mut line = String::new();
 
-        // Send initial server info
+        // Send initial server info (announce negotiated/default version and supported list)
         let server_info = json!({
             "jsonrpc": "2.0",
             "id": 0,
             "result": {
-                "protocolVersion": "1.0",
+                "protocolVersion": self.version.as_str(),
                 "serverInfo": {
                     "name": "garnix-insights",
                     "version": "0.2.0"
@@ -56,7 +113,8 @@ impl GarnixMcpServer {
                     "tools": {
                         "listChanged": false
                     }
-                }
+                },
+                "supportedVersions": McpVersion::SUPPORTED.iter().map(|v| v.as_str()).collect::<Vec<_>>()
             }
         });
 
@@ -111,11 +169,19 @@ impl GarnixMcpServer {
         match request.method.as_str() {
             "initialize" => {
                 tracing::info!("Handling initialize request");
+                // Allow client to request a version in params.protocolVersion
+                let requested = request
+                    .params
+                    .as_ref()
+                    .and_then(|p| p.get("protocolVersion"))
+                    .and_then(|v| v.as_str());
+                let chosen = negotiate_version(requested);
+
                 McpResponse {
                     jsonrpc: "2.0".to_string(),
                     id: request.id,
                     result: Some(json!({
-                        "protocolVersion": "1.0",
+                        "protocolVersion": chosen.as_str(),
                         "serverInfo": {
                             "name": "garnix-insights",
                             "version": "0.2.0"
@@ -124,7 +190,8 @@ impl GarnixMcpServer {
                             "tools": {
                                 "listChanged": false
                             }
-                        }
+                        },
+                        "supportedVersions": McpVersion::SUPPORTED.iter().map(|v| v.as_str()).collect::<Vec<_>>()
                     })),
                     error: None,
                 }
