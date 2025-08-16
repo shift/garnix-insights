@@ -101,8 +101,13 @@ For AI assistant integration:
 
 ```bash
 export GARNIX_JWT_TOKEN="your_jwt_token_here"
+# Optional: choose protocol version (latest|stable|legacy|YYYY-MM-DD)
+export GARNIX_MCP_PROTOCOL_VERSION=stable
+# or pass as a flag: --mcp-version 2025-03-26
 garnix-insights mcp
 ```
+
+See MCP protocol details in MCP-USAGE.md.
 
 ## AI Assistant Integration
 

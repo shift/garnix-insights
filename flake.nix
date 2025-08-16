@@ -182,6 +182,7 @@
             git-filter-repo  # For rewriting git history
             python3  # Required by git-filter-repo
             gh  # GitHub CLI for releases
+	    opencode
             
             # Custom scripts for crates.io testing
             (pkgs.writeScriptBin "test-cratesio" ''
