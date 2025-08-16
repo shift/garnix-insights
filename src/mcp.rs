@@ -82,7 +82,10 @@ impl GarnixMcpServer {
 
     /// Create a new MCP server with custom Garnix client
     pub fn with_client(client: GarnixClient) -> Self {
-        Self { client, version: McpVersion::V2025_03_26 }
+        Self {
+            client,
+            version: McpVersion::V2025_03_26,
+        }
     }
 
     /// Create a new MCP server with custom client and version

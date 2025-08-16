@@ -24,6 +24,24 @@ cargo install garnix-insights
 
 3. **Start Claude Desktop** - Garnix tools will be available automatically
 
+## Protocol version
+
+MCP protocol versions can be controlled via a flag or environment variable. Defaults to "stable".
+
+- CLI flag:
+```bash
+garnix-insights mcp --mcp-version stable
+# also accepts: latest | legacy | YYYY-MM-DD (e.g., 2025-03-26)
+```
+
+- Environment variable:
+```bash
+export GARNIX_MCP_PROTOCOL_VERSION=2025-03-26
+garnix-insights mcp
+```
+
+At startup, the server negotiates the requested version and advertises its supportedVersions in the initialize handshake.
+
 ## Available Tools
 
 ### 1. get_build_status
