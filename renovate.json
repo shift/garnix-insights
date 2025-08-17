@@ -68,13 +68,13 @@
     {
       "description": "Dev dependencies - lower priority",
       "matchDepTypes": ["dev-dependencies"],
-      "schedule": ["before 6am on first day of month"],
+      "schedule": ["* 0-5 1 * *"],
       "labels": ["dependencies", "dev"]
     },
     {
       "description": "Nix flake inputs - handle carefully",
       "matchManagers": ["nix"],
-      "schedule": ["before 6am on first day of month"],
+      "schedule": ["* 0-5 1 * *"],
       "labels": ["dependencies", "nix"],
       "reviewers": ["shift"]
     },
