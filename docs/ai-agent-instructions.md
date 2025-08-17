@@ -1,3 +1,9 @@
+---
+layout: default
+title: AI Agent Instructions
+permalink: /ai-agent-instructions/
+---
+
 # AI Agent Instructions for EzRaft (NixOS-based Rust)
 
 These instructions govern all AI actions in this repository and are tailored to EzRaft’s Nix flake and Rust setup.
